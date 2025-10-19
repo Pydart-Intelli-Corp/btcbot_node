@@ -17,7 +17,7 @@
     "pm2:delete": "pm2 delete ecosystem.config.js",
     "deploy": "npm run build:prod && npm run pm2:start",
     "redeploy": "npm run build:prod && npm run pm2:restart",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint . && next lint",
     "lint:fix": "eslint . --fix",
     "create-db": "node create-database.js",
