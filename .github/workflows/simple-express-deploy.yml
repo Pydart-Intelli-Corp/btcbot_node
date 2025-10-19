@@ -48,17 +48,17 @@ jobs:
           git reset --hard origin/main || echo "Reset completed"
           git clean -fd || echo "Clean completed"
           
-          # Create .env file
+          # Create .env file with all secrets
           echo "⚙️ Creating environment configuration..."
-          cat > .env << 'EOF'
-          NODE_ENV=production
-          PORT=5000
+          cat > .env << EOF
+          NODE_ENV=${{ secrets.NODE_ENV }}
+          PORT=80
           
           # Database Configuration
           DB_HOST=localhost
           DB_PORT=3306
-          DB_NAME=btcbot
-          DB_USER=btcbot_user
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_USER=${{ secrets.DB_USER }}
           DB_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
           
           # JWT Configuration
@@ -69,8 +69,17 @@ jobs:
           ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
           
           # Application Settings
-          BASE_URL=http://${{ secrets.VPS_HOST }}:5000
-          ALLOWED_ORIGINS=http://${{ secrets.VPS_HOST }}:5000,http://localhost:3000
+          BASE_URL=http://${{ secrets.VPS_HOST }}
+          ALLOWED_ORIGINS=http://${{ secrets.VPS_HOST }},http://localhost:3000
+          
+          # Email Configuration (optional)
+          EMAIL_HOST=${{ secrets.EMAIL_HOST }}
+          EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+          EMAIL_USER=${{ secrets.EMAIL_USER }}
+          EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+          
+          # Backup Configuration
+          BACKUP_RETENTION_DAYS=${{ secrets.BACKUP_RETENTION_DAYS }}
           EOF
           
           # Install dependencies
@@ -96,21 +105,21 @@ jobs:
           # Check application health
           echo "🏥 Checking application health..."
           sleep 10
-          curl -f http://localhost:5000/health || echo "Health check pending..."
+          curl -f http://localhost:80/health || echo "Health check pending..."
           
           # Show application info
           echo "✅ Deployment completed!"
-          echo "📍 Application URL: http://${{ secrets.VPS_HOST }}:5000"
-          echo "🔧 Admin Panel: http://${{ secrets.VPS_HOST }}:5000/adminpanel"
-          echo "📊 Health Check: http://${{ secrets.VPS_HOST }}:5000/health"
+          echo "📍 Application URL: http://${{ secrets.VPS_HOST }}"
+          echo "🔧 Admin Panel: http://${{ secrets.VPS_HOST }}/adminpanel"
+          echo "📊 Health Check: http://${{ secrets.VPS_HOST }}/health"
 
     - name: Notify deployment status
       if: always()
       run: |
         if [ ${{ job.status }} == 'success' ]; then
           echo "✅ Deployment successful!"
-          echo "🌐 Application: http://${{ secrets.VPS_HOST }}:5000"
-          echo "🔧 Admin Panel: http://${{ secrets.VPS_HOST }}:5000/adminpanel"
+          echo "🌐 Application: http://${{ secrets.VPS_HOST }}"
+          echo "🔧 Admin Panel: http://${{ secrets.VPS_HOST }}/adminpanel"
         else
           echo "❌ Deployment failed!"
         fi
