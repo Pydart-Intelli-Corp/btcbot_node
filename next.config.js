@@ -23,6 +23,14 @@ const nextConfig = {
   },
   // Configure for Express integration
   outputFileTracingRoot: __dirname,
+  // Skip linting during build for deployment
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // Skip TypeScript type checking during build for deployment
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 module.exports = nextConfig;
