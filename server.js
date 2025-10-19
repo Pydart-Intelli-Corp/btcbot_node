@@ -103,21 +103,9 @@ const startServer = async () => {
     // Apply CORS middleware
     app.use(cors(corsOptions));
 
-    // Security middleware - Adjusted for Next.js
+    // Security middleware - Disabled CSP for Next.js compatibility (fixes white screen issue)
     app.use(helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-          scriptSrc: ["'self'", "'unsafe-eval'", "'unsafe-inline'"],
-          imgSrc: ["'self'", "data:", "https:", "blob:"],
-          connectSrc: ["'self'"],
-          fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-          objectSrc: ["'none'"],
-          mediaSrc: ["'self'"],
-          frameSrc: ["'none'"],
-        },
-      },
+      contentSecurityPolicy: false,
       crossOriginEmbedderPolicy: false
     }));
 

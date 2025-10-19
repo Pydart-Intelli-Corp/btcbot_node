@@ -29,7 +29,25 @@ const protect = asyncHandler(async (req, res, next) => {
     // Verify token
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-    // Get user from token
+    // Handle environment admin user
+    if (decoded.id === 'env-admin') {
+      // Create virtual user object for environment admin
+      req.user = {
+        id: 'env-admin',
+        email: process.env.ADMIN_EMAIL || 'btcclub48@gmail.com',
+        firstName: process.env.ADMIN_FIRST_NAME || 'Admin',
+        lastName: process.env.ADMIN_LAST_NAME || 'User',
+        role: 'superadmin',
+        isActive: true,
+        isEmailVerified: true,
+        currentRank: 'Admin',
+        lastLogin: new Date(),
+        createdAt: new Date()
+      };
+      return next();
+    }
+
+    // Get user from token (for database users)
     const user = await User.findByPk(decoded.id, {
       attributes: { exclude: ['password'] }
     });
@@ -69,9 +87,11 @@ const protect = asyncHandler(async (req, res, next) => {
       return next(authError('Account is temporarily locked due to security reasons.'));
     }
 
-    // Update last activity
-    user.lastActivity = new Date();
-    await user.save({ validateBeforeSave: false });
+    // Update last activity (only for database users)
+    if (user.save) {
+      user.lastActivity = new Date();
+      await user.save({ validateBeforeSave: false });
+    }
 
     // Add user to request object
     req.user = user;

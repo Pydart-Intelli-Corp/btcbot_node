@@ -1,0 +1,231 @@
+name: Environment-Based Deployment
+
+on:
+  push:
+    branches: [ main, staging, develop ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Choose deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  determine-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+      deploy-url: ${{ steps.env.outputs.deploy-url }}
+    steps:
+    - name: Determine deployment environment
+      id: env
+      run: |
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          ENV="${{ github.event.inputs.environment }}"
+        elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          ENV="production"
+        elif [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+          ENV="staging"
+        else
+          ENV="development"
+        fi
+        
+        echo "environment=$ENV" >> $GITHUB_OUTPUT
+        
+        case $ENV in
+          production)
+            echo "deploy-url=http://72.61.144.187:5000" >> $GITHUB_OUTPUT
+            ;;
+          staging)
+            echo "deploy-url=http://72.61.144.187:5001" >> $GITHUB_OUTPUT
+            ;;
+          *)
+            echo "deploy-url=http://72.61.144.187:5002" >> $GITHUB_OUTPUT
+            ;;
+        esac
+
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run linting
+      run: npm run lint || echo "Linting completed with warnings"
+
+    - name: Run tests
+      run: npm test --if-present
+
+    - name: Build application
+      run: npm run build:prod
+      env:
+        NODE_ENV: production
+
+  deploy:
+    needs: [determine-environment, build-and-test]
+    runs-on: ubuntu-latest
+    environment: 
+      name: ${{ needs.determine-environment.outputs.environment }}
+      url: ${{ needs.determine-environment.outputs.deploy-url }}
+    
+    steps:
+    - name: Deploy to ${{ needs.determine-environment.outputs.environment }}
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: ${{ secrets.VPS_PORT }}
+        envs: DEPLOY_ENV,DEPLOY_PORT,DEPLOY_BRANCH
+        script: |
+          # Set environment variables
+          DEPLOY_ENV="${{ needs.determine-environment.outputs.environment }}"
+          DEPLOY_BRANCH="${{ github.ref_name }}"
+          
+          # Set port based on environment
+          case $DEPLOY_ENV in
+            production)
+              DEPLOY_PORT=5000
+              APP_NAME="btcbot24-prod"
+              ;;
+            staging)
+              DEPLOY_PORT=5001
+              APP_NAME="btcbot24-staging"
+              ;;
+            *)
+              DEPLOY_PORT=5002
+              APP_NAME="btcbot24-dev"
+              ;;
+          esac
+          
+          echo "🚀 Deploying to: $DEPLOY_ENV"
+          echo "🌿 Branch: $DEPLOY_BRANCH"
+          echo "🔌 Port: $DEPLOY_PORT"
+          echo "📱 App Name: $APP_NAME"
+          
+          # Create environment-specific directory
+          APP_DIR="/var/www/btcbot24-$DEPLOY_ENV"
+          sudo mkdir -p $APP_DIR
+          
+          # Navigate to application directory
+          cd $APP_DIR
+          
+          # Initialize git repository if it doesn't exist
+          if [ ! -d ".git" ]; then
+            git clone https://github.com/Pydart-Intelli-Corp/btcbot_node.git .
+          fi
+          
+          # Stop existing PM2 process
+          pm2 stop $APP_NAME || echo "No existing process to stop"
+          
+          # Pull latest code
+          git fetch origin
+          git checkout $DEPLOY_BRANCH
+          git pull origin $DEPLOY_BRANCH
+          
+          # Install dependencies
+          npm ci --production
+          
+          # Copy environment-specific .env file
+          if [ -f ".env.$DEPLOY_ENV" ]; then
+            cp .env.$DEPLOY_ENV .env
+          elif [ ! -f ".env" ]; then
+            cp .env.example .env
+            echo "⚠️ Using .env.example - please configure for $DEPLOY_ENV"
+          fi
+          
+          # Update PORT in .env
+          sed -i "s/^PORT=.*/PORT=$DEPLOY_PORT/" .env
+          
+          # Run database migrations (production only)
+          if [ "$DEPLOY_ENV" == "production" ]; then
+            npm run db:migrate || echo "Migrations completed"
+          fi
+          
+          # Build application
+          npm run build:prod
+          
+          # Create/update PM2 ecosystem file for this environment
+          cat > ecosystem.$DEPLOY_ENV.config.js << EOF
+          module.exports = {
+            apps: [{
+              name: '$APP_NAME',
+              script: 'server.js',
+              instances: $( [ "$DEPLOY_ENV" == "production" ] && echo "2" || echo "1" ),
+              exec_mode: 'cluster',
+              env: {
+                NODE_ENV: '$DEPLOY_ENV',
+                PORT: $DEPLOY_PORT
+              },
+              log_date_format: 'YYYY-MM-DD HH:mm Z',
+              error_file: './logs/err-$DEPLOY_ENV.log',
+              out_file: './logs/out-$DEPLOY_ENV.log',
+              log_file: './logs/combined-$DEPLOY_ENV.log',
+              time: true,
+              autorestart: true,
+              max_restarts: 10,
+              min_uptime: '10s',
+              max_memory_restart: '1G'
+            }]
+          };
+          EOF
+          
+          # Start PM2 with environment-specific config
+          pm2 start ecosystem.$DEPLOY_ENV.config.js
+          
+          # Wait for application to start
+          sleep 10
+          
+          # Health check
+          HEALTH_CHECK=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:$DEPLOY_PORT/health || echo "000")
+          
+          if [ "$HEALTH_CHECK" = "200" ]; then
+            echo "✅ Health check passed for $DEPLOY_ENV environment!"
+            pm2 save
+          else
+            echo "❌ Health check failed for $DEPLOY_ENV environment!"
+            pm2 logs $APP_NAME --lines 20
+            exit 1
+          fi
+          
+          # Show final status
+          pm2 status
+          echo "✅ Deployment to $DEPLOY_ENV completed successfully!"
+          echo "🌐 Application URL: http://72.61.144.187:$DEPLOY_PORT"
+
+  notify:
+    needs: [determine-environment, deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Deployment notification
+      run: |
+        ENV="${{ needs.determine-environment.outputs.environment }}"
+        URL="${{ needs.determine-environment.outputs.deploy-url }}"
+        STATUS="${{ needs.deploy.result }}"
+        
+        if [ "$STATUS" == "success" ]; then
+          echo "✅ Successfully deployed to $ENV environment!"
+          echo "🌐 Application URL: $URL"
+          echo "🔗 Admin Panel: $URL/adminpanel"
+        else
+          echo "❌ Deployment to $ENV environment failed!"
+          echo "📋 Please check the logs for more information."
+        fi

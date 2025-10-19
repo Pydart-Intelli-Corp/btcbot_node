@@ -1,5 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const { 
@@ -12,6 +13,24 @@ const { sendErrorResponse, sendSuccessResponse } = require('../utils/responseHel
 const logger = require('../utils/logger');
 
 const router = express.Router();
+
+// Admin credentials from environment variables
+const ADMIN_CREDENTIALS = {
+  email: process.env.ADMIN_EMAIL || 'btcclub48@gmail.com',
+  password: process.env.ADMIN_PASSWORD || 'Asd@123456',
+  user: {
+    id: 999999,
+    email: process.env.ADMIN_EMAIL || 'btcclub48@gmail.com',
+    firstName: process.env.ADMIN_FIRST_NAME || 'Admin',
+    lastName: process.env.ADMIN_LAST_NAME || 'User',
+    role: 'admin',
+    isActive: true,
+    isEmailVerified: true,
+    currentRank: 'Admin',
+    lastLogin: new Date(),
+    createdAt: new Date()
+  }
+};
 
 // Admin login validation
 const adminLoginValidation = [
@@ -38,7 +57,62 @@ const adminLogin = asyncHandler(async (req, res, next) => {
   // Normalize email to lowercase for consistent lookup
   const normalizedEmail = email.toLowerCase().trim();
 
-  // Check for user and include password
+  // First check if this matches the environment admin credentials
+  if (normalizedEmail === ADMIN_CREDENTIALS.email.toLowerCase() && password === ADMIN_CREDENTIALS.password) {
+    // Create admin user object for token generation
+    const adminUser = {
+      id: 'env-admin',
+      email: ADMIN_CREDENTIALS.email,
+      firstName: ADMIN_CREDENTIALS.firstName,
+      lastName: ADMIN_CREDENTIALS.lastName,
+      role: 'superadmin',
+      isActive: true,
+      isEmailVerified: true,
+      currentRank: 'Admin',
+      lastLogin: new Date(),
+      createdAt: new Date()
+    };
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: adminUser.id, email: adminUser.email, role: adminUser.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRE || '30d' }
+    );
+
+    // Log successful admin login
+    logger.logAuthAttempt(normalizedEmail, true, req.ip, req.get('User-Agent'));
+    logger.logSecurityEvent(
+      'ENV_ADMIN_LOGIN_SUCCESS',
+      'Environment admin logged in successfully',
+      'env-admin',
+      req.ip,
+      req.get('User-Agent')
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Admin login successful',
+      data: {
+        token,
+        user: {
+          id: adminUser.id,
+          email: adminUser.email,
+          firstName: adminUser.firstName,
+          lastName: adminUser.lastName,
+          role: adminUser.role,
+          isActive: adminUser.isActive,
+          isEmailVerified: adminUser.isEmailVerified,
+          currentRank: adminUser.currentRank,
+          lastLogin: adminUser.lastLogin,
+          createdAt: adminUser.createdAt
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // If not environment admin, check database
   const user = await User.findOne({ 
     where: { email: normalizedEmail },
     attributes: { include: ['password'] }

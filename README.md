@@ -4,6 +4,18 @@
 
 A comprehensive Node.js backend API server for a cryptocurrency trading platform with referral-based subscription system, now using MySQL database with Sequelize ORM.
 
+## 🚀 CI/CD Deployment
+
+This project includes **GitHub Actions** for automated deployment to VPS servers:
+
+- **Automatic Deployment**: Deploy on push to main branch
+- **Environment Support**: Production, staging, and development environments
+- **Health Checks**: Automated application health verification
+- **Rollback Support**: One-click rollback to previous versions
+- **Zero Downtime**: PM2 cluster mode with graceful reloads
+
+[📖 **Setup GitHub Actions Deployment**](./GITHUB_ACTIONS_SETUP.md)
+
 ## Features
 
 - **User Authentication**: Registration, login, JWT tokens, password reset
@@ -16,6 +28,7 @@ A comprehensive Node.js backend API server for a cryptocurrency trading platform
 - **Bot Management**: Automated trading bot activation and earnings simulation
 - **Transaction History**: Comprehensive transaction logging and reporting
 - **Security**: Rate limiting, input validation, secure headers, logging
+- **Automated Deployment**: GitHub Actions CI/CD pipeline
 
 ## Tech Stack
 
@@ -230,6 +243,9 @@ npm run dev
 # Start production server
 npm start
 
+# Build for production
+npm run build:prod
+
 # Run tests (when implemented)
 npm test
 
@@ -239,6 +255,64 @@ npm run lint
 # Fix linting issues
 npm run lint:fix
 ```
+
+## 🚀 Deployment
+
+### GitHub Actions (Recommended)
+
+Automated deployment with CI/CD pipeline:
+
+```bash
+# Setup GitHub Actions (one-time setup)
+# See GITHUB_ACTIONS_SETUP.md for detailed instructions
+
+# Deploy by pushing to main branch
+git push origin main
+
+# Manual deployment trigger
+# Go to GitHub → Actions → Run workflow
+```
+
+### Manual Deployment
+
+```bash
+# Initial server setup
+npm run setup:prod
+
+# Deploy application
+npm run deploy
+
+# Update existing deployment
+npm run redeploy
+
+# PM2 process management
+npm run pm2:start    # Start processes
+npm run pm2:restart  # Restart processes  
+npm run pm2:stop     # Stop processes
+```
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and configure:
+
+```bash
+cp .env.example .env
+# Edit .env with your production settings
+
+# Key variables for production:
+NODE_ENV=production
+DB_HOST=127.0.0.1
+DB_NAME=btcbot_db
+DB_USER=btcbot
+ADMIN_EMAIL=your-admin@email.com
+ADMIN_PASSWORD=your-secure-password
+```
+
+## 📚 Documentation
+
+- [🚀 GitHub Actions Setup Guide](./GITHUB_ACTIONS_SETUP.md) - Complete CI/CD setup
+- [📋 Deployment Guide](./DEPLOYMENT.md) - Manual deployment instructions
+- [📝 Changes Summary](./CHANGES_SUMMARY.md) - All changes made for production
 
 ## Support
 

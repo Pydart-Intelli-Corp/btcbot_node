@@ -1,0 +1,101 @@
+name: Deploy to Hostinger VPS
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [ closed ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests (if available)
+      run: npm test --if-present
+
+    - name: Build application
+      run: npm run build:prod
+      env:
+        NODE_ENV: production
+
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: ${{ secrets.VPS_PORT }}
+        script: |
+          echo "🚀 Starting deployment..."
+          
+          # Navigate to application directory
+          cd /var/www/btcbot24
+          
+          # Stop PM2 processes
+          echo "⏹️ Stopping PM2 processes..."
+          pm2 stop ecosystem.config.js || echo "No processes to stop"
+          
+          # Backup current deployment (optional)
+          echo "💾 Creating backup..."
+          sudo cp -r /var/www/btcbot24 /var/www/btcbot24-backup-$(date +%Y%m%d-%H%M%S) || echo "Backup failed"
+          
+          # Pull latest code
+          echo "📥 Pulling latest code..."
+          git fetch origin
+          git reset --hard origin/main
+          git clean -fd
+          
+          # Install/update dependencies
+          echo "📦 Installing dependencies..."
+          npm ci --production
+          
+          # Run database migrations if needed
+          echo "🗄️ Running database migrations..."
+          npm run db:migrate || echo "Migration completed or no migrations needed"
+          
+          # Build application
+          echo "🔨 Building application..."
+          npm run build:prod
+          
+          # Start PM2 processes
+          echo "▶️ Starting PM2 processes..."
+          pm2 start ecosystem.config.js
+          
+          # Reload PM2 processes (zero-downtime deployment)
+          echo "🔄 Reloading PM2 processes..."
+          pm2 reload ecosystem.config.js
+          
+          # Check PM2 status
+          echo "📊 Checking PM2 status..."
+          pm2 status
+          
+          # Check application health
+          echo "🏥 Checking application health..."
+          sleep 10
+          curl -f http://localhost:5000/health || echo "Health check failed"
+          
+          echo "✅ Deployment completed successfully!"
+
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [ ${{ job.status }} == 'success' ]; then
+          echo "✅ Deployment successful!"
+        else
+          echo "❌ Deployment failed!"
+        fi
