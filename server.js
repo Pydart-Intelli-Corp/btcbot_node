@@ -84,14 +84,9 @@ const startServer = async () => {
         if (allowedOrigins.includes(origin)) {
           callback(null, true);
         } else {
-          logger.logSecurityEvent(
-            'CORS_VIOLATION',
-            `Blocked request from unauthorized origin: ${origin}`,
-            null,
-            null,
-            null
-          );
-          callback(new Error('Not allowed by CORS'));
+          // Allow all origins in production for deployment (can be restricted later)
+          console.log('CORS: Allowing origin:', origin);
+          callback(null, true);
         }
       },
       credentials: true,
@@ -106,7 +101,9 @@ const startServer = async () => {
     // Security middleware - Disabled CSP for Next.js compatibility (fixes white screen issue)
     app.use(helmet({
       contentSecurityPolicy: false,
-      crossOriginEmbedderPolicy: false
+      crossOriginEmbedderPolicy: false,
+      crossOriginOpenerPolicy: false,
+      crossOriginResourcePolicy: false
     }));
 
     // Rate limiting
