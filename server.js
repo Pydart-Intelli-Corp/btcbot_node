@@ -66,7 +66,7 @@ const startServer = async () => {
     // Trust proxy for accurate IP addresses (important for rate limiting)
     app.set('trust proxy', 1);
 
-    // CORS configuration - More permissive for same-origin requests
+    // CORS configuration - Allow all origins for external access
     const corsOptions = {
       origin: function (origin, callback) {
         const allowedOrigins = [
@@ -74,6 +74,8 @@ const startServer = async () => {
           `http://localhost:${process.env.PORT || 5000}`,
           'http://localhost:3000',
           'http://localhost:3001',
+          'http://72.61.144.187',
+          `http://72.61.144.187:${process.env.PORT || 5000}`,
           'https://btcbot24.com',
           'https://www.btcbot24.com'
         ];
@@ -91,19 +93,32 @@ const startServer = async () => {
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
       optionsSuccessStatus: 200
     };
 
     // Apply CORS middleware
     app.use(cors(corsOptions));
 
-    // Security middleware - Disabled CSP for Next.js compatibility (fixes white screen issue)
+    // Security middleware - Completely disabled for Next.js SSR compatibility
+    // NOTE: Helmet security policies cause white screen issues with Next.js
+    // The CSP, COEP, COOP, and CORP policies block Next.js resources
+    // For production, implement security at the Nginx level instead
     app.use(helmet({
       contentSecurityPolicy: false,
       crossOriginEmbedderPolicy: false,
       crossOriginOpenerPolicy: false,
-      crossOriginResourcePolicy: false
+      crossOriginResourcePolicy: false,
+      dnsPrefetchControl: false,
+      frameguard: false,
+      hidePoweredBy: false,
+      hsts: false,
+      ieNoOpen: false,
+      noSniff: false,
+      originAgentCluster: false,
+      permittedCrossDomainPolicies: false,
+      referrerPolicy: false,
+      xssFilter: false
     }));
 
     // Rate limiting
