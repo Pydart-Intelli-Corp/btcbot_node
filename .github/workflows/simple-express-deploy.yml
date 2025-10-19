@@ -74,10 +74,12 @@ jobs:
           ALLOWED_ORIGINS=http://${{ secrets.VPS_HOST }},http://localhost:3000,http://localhost:5000
           
           # Email Configuration (optional)
+          EMAIL_SERVICE=gmail
           EMAIL_HOST=${{ secrets.EMAIL_HOST }}
           EMAIL_PORT=${{ secrets.EMAIL_PORT }}
           EMAIL_USER=${{ secrets.EMAIL_USER }}
           EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+          EMAIL_FROM=noreply@btcbot24.com
           
           # Backup Configuration
           BACKUP_RETENTION_DAYS=${{ secrets.BACKUP_RETENTION_DAYS }}
