@@ -94,7 +94,7 @@ const AffiliateSection = () => {
                   </div>
 
                   {/* Content */}
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 text-center group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 transition-all duration-300">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 text-center group-hover:text-blue-600 transition-all duration-300">
                     {feature.title}
                   </h3>
                   <p className="text-gray-700 text-center leading-relaxed">
@@ -203,45 +203,6 @@ const AffiliateSection = () => {
             {/* Floating Elements */}
             <div className="absolute -top-4 -right-4 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-bounce shadow-lg"></div>
             <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-gradient-to-r from-green-400 to-blue-500 rounded-full animate-bounce delay-75 shadow-lg"></div>
-          </div>
-        </motion.div>
-
-        {/* Call to Action */}
-        <motion.div 
-          className="text-center bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-12 text-white shadow-2xl"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <div className="max-w-3xl mx-auto">
-            <h3 className="text-3xl lg:text-4xl font-bold mb-6">
-              Start Building Your Affiliate Empire Today
-            </h3>
-            <p className="text-xl mb-8 text-blue-100">
-              Join thousands of successful affiliates earning passive income through the BTCBOT24 network. 
-              Your journey to financial freedom starts with a single referral.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/register"
-                className="px-8 py-4 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg"
-              >
-                <span className="flex items-center justify-center">
-                  <Gift className="w-5 h-5 mr-2" />
-                  Join Affiliate Program
-                </span>
-              </Link>
-              <Link
-                href="/affiliate-info"
-                className="px-8 py-4 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-blue-600 transition-all transform hover:scale-105"
-              >
-                <span className="flex items-center justify-center">
-                  <Zap className="w-5 h-5 mr-2" />
-                  Learn More
-                </span>
-              </Link>
-            </div>
           </div>
         </motion.div>
       </div>

@@ -8,6 +8,7 @@ import CustomerReviewsSection from '@/components/CustomerReviewsSection';
 import HowItWorksSection from '@/components/HowItWorksSection';
 import AffiliateSection from '@/components/AffiliateSection';
 import MarketHeatmapSection from '@/components/MarketHeatmapSection';
+import TrendingCryptoSection from '@/components/TrendingCryptoSection';
 import Footer from '@/components/Footer';
 
 export default function Home() {
@@ -24,6 +25,7 @@ export default function Home() {
         <HowItWorksSection />
         <AffiliateSection />
         <MarketHeatmapSection />
+        <TrendingCryptoSection />
       </main>
       <Footer />
     </div>

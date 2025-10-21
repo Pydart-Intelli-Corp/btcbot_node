@@ -47,7 +47,7 @@ const WhyChooseSection = () => {
           <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-gray-900">
             Why Choose <span className="text-blue-600">BTCBOT24</span>?
           </h2>
-          <p className="text-gray-700 text-lg max-w-4xl mx-auto leading-relaxed">
+          <p className="text-gray-800 text-lg max-w-4xl mx-auto leading-relaxed">
             BTCBOT24 doesn&apos;t just follow trends - it pioneers them. It empowers traders to
             navigate both bullish and bearish market conditions with unwavering confidence.
             By leveraging sophisticated algorithms and real-time data streams, BTCBOT24
@@ -75,31 +75,13 @@ const WhyChooseSection = () => {
                   {feature.title}
                 </h3>
                 {feature.subtitle && (
-                  <p className="text-gray-700 text-sm font-medium">
+                  <p className="text-gray-800 text-sm font-medium">
                     {feature.subtitle}
                   </p>
                 )}
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Call to Action */}
-        <div className="text-center">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/login"
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-md hover:shadow-lg"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/register"
-              className="px-8 py-4 border-2 border-blue-500 text-blue-600 font-semibold rounded-lg hover:bg-blue-500 hover:text-white transition-all transform hover:scale-105 shadow-md hover:shadow-lg"
-            >
-              Sign up
-            </Link>
-          </div>
         </div>
       </div>
     </section>

@@ -60,7 +60,7 @@ const FeaturesSection = () => {
 
                 {/* Content */}
                 <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-blue-600 transition-all duration-300">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-all duration-300">
                     {feature.title}
                   </h3>
                   <p className="text-gray-700 leading-relaxed">

@@ -20,7 +20,10 @@ const ClientWrapper = ({ children }: ClientWrapperProps) => {
   const protectedRoutes = ['/dashboard', '/plans', '/transactions', '/referrals', '/profile', '/admin'];
   
   // Routes that should not show any header
-  const noHeaderRoutes = ['/login', '/register'];
+  const noHeaderRoutes = ['/login', '/register', '/adminpanel'];
+  
+  // Admin routes that handle their own layout
+  const adminRoutes = ['/adminpanel'];
   
   // Routes that should show splash screen (only home page)
   const splashRoutes = ['/'];
@@ -31,6 +34,9 @@ const ClientWrapper = ({ children }: ClientWrapperProps) => {
   // Check if current route should not show header
   const shouldShowNoHeader = noHeaderRoutes.some(route => pathname?.startsWith(route));
   
+  // Check if current route is admin route
+  const isAdminRoute = adminRoutes.some(route => pathname?.startsWith(route));
+  
   // Check if current route should show splash
   const shouldShowSplash = splashRoutes.includes(pathname || '/');
 
@@ -39,14 +45,31 @@ const ClientWrapper = ({ children }: ClientWrapperProps) => {
     
     // Check authentication status
     const token = localStorage.getItem('authToken');
-    setIsAuthenticated(!!token);
+    const adminToken = localStorage.getItem('adminToken');
+    const userData = localStorage.getItem('userData');
+    
+    console.log('ClientWrapper - Auth check:', {
+      token: !!token,
+      adminToken: !!adminToken,
+      userData: !!userData,
+      pathname,
+      isProtectedRoute,
+      isAdminRoute
+    });
+    
+    // For admin routes, check admin token; for user routes, check user token
+    if (isAdminRoute) {
+      setIsAuthenticated(!!adminToken);
+    } else {
+      setIsAuthenticated(!!token);
+    }
     
     // Only show splash on home page and if it hasn't been shown in this session
     const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
     if (shouldShowSplash && !hasSeenSplash) {
       setShowSplash(true);
     }
-  }, [shouldShowSplash]);
+  }, [shouldShowSplash, pathname, isProtectedRoute, isAdminRoute]);
 
   const handleSplashComplete = () => {
     setShowSplash(false);
@@ -59,9 +82,21 @@ const ClientWrapper = ({ children }: ClientWrapperProps) => {
 
   // Determine which header to show
   const renderHeader = () => {
-    if (shouldShowNoHeader) return null;
+    if (shouldShowNoHeader || isAdminRoute) {
+      console.log('ClientWrapper - No header for route:', pathname, { shouldShowNoHeader, isAdminRoute });
+      return null;
+    }
     
-    if (isAuthenticated || isProtectedRoute) {
+    const shouldShowUserHeader = isAuthenticated || isProtectedRoute;
+    console.log('ClientWrapper - Header decision:', {
+      shouldShowUserHeader,
+      isAuthenticated,
+      isProtectedRoute,
+      isAdminRoute,
+      pathname
+    });
+    
+    if (shouldShowUserHeader) {
       return <UserHeader />;
     }
     

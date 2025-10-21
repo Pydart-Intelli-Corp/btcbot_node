@@ -5,6 +5,68 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { handleApiResponse } from '../../utils/errorHandler';
 
+// Custom CSS to force text visibility
+const inputStyle = `
+  .otp-input {
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+  .otp-input:focus {
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+  .otp-input::-webkit-autofill,
+  .otp-input::-webkit-autofill:hover,
+  .otp-input::-webkit-autofill:focus,
+  .otp-input::-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #111827 !important;
+    color: #111827 !important;
+  }
+  
+  /* Force link visibility */
+  .otp-link {
+    color: #2563eb !important;
+    text-decoration: none !important;
+  }
+  .otp-link:hover {
+    color: #1d4ed8 !important;
+    text-decoration: none !important;
+  }
+  .otp-link:visited {
+    color: #2563eb !important;
+  }
+  .otp-link:active {
+    color: #1e40af !important;
+  }
+  
+  /* Override any global link styles */
+  a.otp-link,
+  a.otp-link:hover,
+  a.otp-link:focus,
+  a.otp-link:active,
+  a.otp-link:visited {
+    color: #2563eb !important;
+    opacity: 1 !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: #2563eb !important;
+  }
+  a.otp-link:hover {
+    color: #1d4ed8 !important;
+    -webkit-text-fill-color: #1d4ed8 !important;
+  }
+`;
+
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.innerText = inputStyle;
+  document.head.appendChild(styleSheet);
+}
+
 interface UserInfo {
   email: string;
   firstName: string;
@@ -225,8 +287,13 @@ export default function VerifyOTPPage() {
                     value={digit}
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all"
+                    className="otp-input w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all bg-white"
                     placeholder="0"
+                    style={{
+                      color: '#111827 !important',
+                      backgroundColor: '#ffffff !important',
+                      WebkitTextFillColor: '#111827 !important'
+                    }}
                   />
                 ))}
               </div>
@@ -317,7 +384,14 @@ export default function VerifyOTPPage() {
               )}
               <Link 
                 href="/"
-                className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors inline-block text-center"
+                className="otp-link w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors inline-block text-center"
+                style={{ color: '#374151 !important' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f9fafb';
+                }}
               >
                 Back to Homepage
               </Link>
@@ -371,7 +445,14 @@ export default function VerifyOTPPage() {
               
               <Link 
                 href="/register"
-                className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors inline-block text-center"
+                className="otp-link w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors inline-block text-center"
+                style={{ color: '#374151 !important' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f9fafb';
+                }}
               >
                 Start Over
               </Link>
@@ -411,7 +492,7 @@ export default function VerifyOTPPage() {
             <Link 
               href="/terms-and-conditions" 
               target="_blank"
-              className="hover:text-blue-500 transition-colors"
+              className="otp-link transition-colors"
             >
               Terms & Conditions
             </Link>
@@ -419,7 +500,7 @@ export default function VerifyOTPPage() {
             <Link 
               href="/privacy-policy" 
               target="_blank"
-              className="hover:text-blue-500 transition-colors"
+              className="otp-link transition-colors"
             >
               Privacy Policy
             </Link>

@@ -348,7 +348,7 @@ export default function DepositManagement() {
                           alt="Payment Proof"
                           className="w-full h-32 object-cover rounded"
                         />
-                        <button className="w-full mt-2 text-sm text-blue-600 hover:text-blue-700 flex items-center justify-center">
+                        <button className="w-full mt-2 text-sm text-white bg-blue-600 hover:bg-blue-700 flex items-center justify-center px-3 py-2 rounded-lg transition-colors">
                           <EyeIcon className="h-4 w-4 mr-1" />
                           View Full Size
                         </button>

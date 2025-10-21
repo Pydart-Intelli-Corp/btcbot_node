@@ -25,6 +25,55 @@ import {
   Award
 } from 'lucide-react';
 
+// Custom CSS to force text visibility
+const inputStyle = `
+  .profile-input {
+    color: #6b7280 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #6b7280 !important;
+  }
+  .profile-input:focus {
+    color: #6b7280 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #6b7280 !important;
+  }
+  .profile-input::-webkit-autofill,
+  .profile-input::-webkit-autofill:hover,
+  .profile-input::-webkit-autofill:focus,
+  .profile-input::-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #6b7280 !important;
+    color: #6b7280 !important;
+  }
+  
+  /* Fix for active menu buttons */
+  .profile-menu-active {
+    background-color: #dbeafe !important;
+    color: #2563eb !important;
+    border: 1px solid #93c5fd !important;
+  }
+  .profile-menu-active .menu-icon,
+  .profile-menu-active .menu-text {
+    color: #16a34a !important;
+    -webkit-text-fill-color: #16a34a !important;
+  }
+  .profile-menu-inactive {
+    color: #4b5563 !important;
+    -webkit-text-fill-color: #4b5563 !important;
+  }
+  .profile-menu-inactive:hover {
+    background-color: #f9fafb !important;
+    color: #374151 !important;
+    -webkit-text-fill-color: #374151 !important;
+  }
+`;
+
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.innerText = inputStyle;
+  document.head.appendChild(styleSheet);
+}
+
 // Flag display component
 const FlagDisplay = ({ countryCode }: { countryCode: string }) => {
   const country = COUNTRIES.find(c => c.code === countryCode);
@@ -735,13 +784,13 @@ const ProfileSettings: React.FC = () => {
                     onClick={() => setActiveTab('personal')}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
                       activeTab === 'personal' 
-                        ? 'bg-blue-50 text-blue-600 border border-blue-200' 
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'profile-menu-active' 
+                        : 'profile-menu-inactive'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <User size={20} />
-                      <span>Personal Info</span>
+                      <User size={20} className={activeTab === 'personal' ? 'menu-icon text-green-600' : 'text-gray-600'} />
+                      <span className={activeTab === 'personal' ? 'menu-text text-green-600 font-medium' : 'text-gray-600'}>Personal Info</span>
                     </div>
                   </button>
 
@@ -749,13 +798,13 @@ const ProfileSettings: React.FC = () => {
                     onClick={() => setActiveTab('security')}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
                       activeTab === 'security' 
-                        ? 'bg-blue-50 text-blue-600 border border-blue-200' 
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'profile-menu-active' 
+                        : 'profile-menu-inactive'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <Shield size={20} />
-                      <span>Security</span>
+                      <Shield size={20} className={activeTab === 'security' ? 'menu-icon text-green-600' : 'text-gray-600'} />
+                      <span className={activeTab === 'security' ? 'menu-text text-green-600 font-medium' : 'text-gray-600'}>Security</span>
                     </div>
                   </button>
 
@@ -763,13 +812,13 @@ const ProfileSettings: React.FC = () => {
                     onClick={() => setActiveTab('wallet')}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
                       activeTab === 'wallet' 
-                        ? 'bg-blue-50 text-blue-600 border border-blue-200' 
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'profile-menu-active' 
+                        : 'profile-menu-inactive'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <Wallet size={20} />
-                      <span>Wallet & QR</span>
+                      <Wallet size={20} className={activeTab === 'wallet' ? 'menu-icon text-green-600' : 'text-gray-600'} />
+                      <span className={activeTab === 'wallet' ? 'menu-text text-green-600 font-medium' : 'text-gray-600'}>Wallet & QR</span>
                     </div>
                   </button>
 
@@ -777,13 +826,13 @@ const ProfileSettings: React.FC = () => {
                     onClick={() => setActiveTab('referral')}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
                       activeTab === 'referral' 
-                        ? 'bg-blue-50 text-blue-600 border border-blue-200' 
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'profile-menu-active' 
+                        : 'profile-menu-inactive'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <Settings size={20} />
-                      <span>Referral Info</span>
+                      <Settings size={20} className={activeTab === 'referral' ? 'menu-icon text-green-600' : 'text-gray-600'} />
+                      <span className={activeTab === 'referral' ? 'menu-text text-green-600 font-medium' : 'text-gray-600'}>Referral Info</span>
                     </div>
                   </button>
                 </div>
@@ -840,10 +889,15 @@ const ProfileSettings: React.FC = () => {
                             type="text"
                             value={formData.firstName}
                             onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                            className={`profile-input w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                               errors.firstName ? 'border-red-500' : 'border-gray-300'
                             }`}
                             placeholder="Enter your first name"
+                            style={{
+                              color: '#6b7280 !important',
+                              backgroundColor: '#ffffff !important',
+                              WebkitTextFillColor: '#6b7280 !important'
+                            }}
                           />
                           {errors.firstName && (
                             <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
@@ -858,10 +912,15 @@ const ProfileSettings: React.FC = () => {
                             type="text"
                             value={formData.lastName}
                             onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                            className={`profile-input w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                               errors.lastName ? 'border-red-500' : 'border-gray-300'
                             }`}
                             placeholder="Enter your last name"
+                            style={{
+                              color: '#6b7280 !important',
+                              backgroundColor: '#ffffff !important',
+                              WebkitTextFillColor: '#6b7280 !important'
+                            }}
                           />
                           {errors.lastName && (
                             <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
@@ -910,10 +969,15 @@ const ProfileSettings: React.FC = () => {
                             type="tel"
                             value={formData.phoneNumber}
                             onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                            className={`flex-1 px-4 py-3 border rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                            className={`profile-input flex-1 px-4 py-3 border rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                               errors.phoneNumber ? 'border-red-500' : 'border-gray-300'
                             }`}
                             placeholder="Enter your phone number"
+                            style={{
+                              color: '#6b7280 !important',
+                              backgroundColor: '#ffffff !important',
+                              WebkitTextFillColor: '#6b7280 !important'
+                            }}
                           />
                         </div>
                         {errors.phoneNumber && (
@@ -942,18 +1006,25 @@ const ProfileSettings: React.FC = () => {
                               type={showPassword ? 'text' : 'password'}
                               value={formData.currentPassword}
                               onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                              className={`w-full px-4 py-3 border rounded-lg pr-12 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                              className={`profile-input w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                                 errors.currentPassword ? 'border-red-500' : 'border-gray-300'
                               }`}
                               placeholder="Enter current password"
+                              style={{
+                                color: '#6b7280 !important',
+                                backgroundColor: '#ffffff !important',
+                                WebkitTextFillColor: '#6b7280 !important'
+                              }}
                             />
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                            >
-                              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </button>
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none p-1"
+                              >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                              </button>
+                            </div>
                           </div>
                           {errors.currentPassword && (
                             <p className="mt-1 text-sm text-red-600">{errors.currentPassword}</p>
@@ -968,10 +1039,15 @@ const ProfileSettings: React.FC = () => {
                             type="password"
                             value={formData.newPassword}
                             onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                            className={`profile-input w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                               errors.newPassword ? 'border-red-500' : 'border-gray-300'
                             }`}
                             placeholder="Enter new password"
+                            style={{
+                              color: '#6b7280 !important',
+                              backgroundColor: '#ffffff !important',
+                              WebkitTextFillColor: '#6b7280 !important'
+                            }}
                           />
                           {errors.newPassword && (
                             <p className="mt-1 text-sm text-red-600">{errors.newPassword}</p>
@@ -986,10 +1062,15 @@ const ProfileSettings: React.FC = () => {
                             type="password"
                             value={formData.confirmPassword}
                             onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                            className={`profile-input w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                               errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
                             }`}
                             placeholder="Confirm new password"
+                            style={{
+                              color: '#6b7280 !important',
+                              backgroundColor: '#ffffff !important',
+                              WebkitTextFillColor: '#6b7280 !important'
+                            }}
                           />
                           {errors.confirmPassword && (
                             <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
@@ -1036,10 +1117,15 @@ const ProfileSettings: React.FC = () => {
                             type="text"
                             value={formData.walletAddress}
                             onChange={(e) => setFormData({ ...formData, walletAddress: e.target.value })}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                            className={`profile-input w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                               errors.walletAddress ? 'border-red-500' : 'border-gray-300'
                             }`}
                             placeholder="Enter your crypto wallet address"
+                            style={{
+                              color: '#6b7280 !important',
+                              backgroundColor: '#ffffff !important',
+                              WebkitTextFillColor: '#6b7280 !important'
+                            }}
                           />
                           {errors.walletAddress && (
                             <p className="mt-1 text-sm text-red-600">{errors.walletAddress}</p>

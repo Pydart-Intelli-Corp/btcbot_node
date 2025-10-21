@@ -3,9 +3,71 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, AlertCircle, CheckCircle, Bitcoin } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, CheckCircle, Bitcoin, Mail, Lock } from 'lucide-react';
 import { handleApiResponse } from '../../utils/errorHandler';
 import VerificationPromptModal from '../../components/VerificationPromptModal';
+
+// Custom CSS to force text visibility
+const inputStyle = `
+  .login-input {
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+  .login-input:focus {
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+  .login-input::-webkit-autofill,
+  .login-input::-webkit-autofill:hover,
+  .login-input::-webkit-autofill:focus,
+  .login-input::-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #111827 !important;
+    color: #111827 !important;
+  }
+  
+  /* Force link visibility */
+  .login-link {
+    color: #2563eb !important;
+    text-decoration: none !important;
+  }
+  .login-link:hover {
+    color: #1d4ed8 !important;
+    text-decoration: none !important;
+  }
+  .login-link:visited {
+    color: #2563eb !important;
+  }
+  .login-link:active {
+    color: #1e40af !important;
+  }
+  
+  /* Override any global link styles */
+  a.login-link,
+  a.login-link:hover,
+  a.login-link:focus,
+  a.login-link:active,
+  a.login-link:visited {
+    color: #2563eb !important;
+    opacity: 1 !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: #2563eb !important;
+  }
+  a.login-link:hover {
+    color: #1d4ed8 !important;
+    -webkit-text-fill-color: #1d4ed8 !important;
+  }
+`;
+
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.innerText = inputStyle;
+  document.head.appendChild(styleSheet);
+}
 
 // Set document title for user login
 if (typeof window !== 'undefined') {
@@ -163,196 +225,271 @@ const LoginPage = () => {
 
   if (isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-800 to-indigo-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white rounded-3xl p-8 shadow-2xl text-center max-w-md mx-4"
         >
-          <CheckCircle className="h-16 w-16 text-green-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Login Successful!</h2>
-          <p className="text-gray-300">Redirecting to dashboard...</p>
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="h-8 w-8 text-green-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Login Successful!</h2>
+          <p className="text-gray-600">Redirecting to your dashboard...</p>
+          <div className="mt-4">
+            <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          </div>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-800 to-indigo-900 flex items-center justify-center px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-full max-w-md"
-      >
-        {/* Header */}
-        <div className="text-center mb-8">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring" }}
-            className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-4"
-          >
-            <Bitcoin className="h-8 w-8 text-white" />
-          </motion.div>
-          <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-gray-300">Sign in to your BTCBOT24 account</p>
-          <div className="mt-2 inline-flex items-center px-3 py-1 bg-blue-600/20 border border-blue-500/30 rounded-full">
-            <span className="text-sm text-blue-300">👤 User Login</span>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div className="absolute top-0 right-0 w-72 h-72 bg-purple-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-pink-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"></div>
+        <div className="absolute -bottom-8 -right-8 w-72 h-72 bg-indigo-500/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-6000"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 min-h-screen flex">
+        {/* Left Side - Branding */}
+        <div className="hidden lg:flex lg:w-1/2 relative">
+          <div className="flex flex-col justify-center items-center p-12 text-white w-full">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-center max-w-lg"
+            >
+              <div className="relative mb-8">
+                <div className="w-24 h-24 bg-gradient-to-r from-blue-400 to-purple-500 rounded-3xl flex items-center justify-center mx-auto shadow-2xl shadow-purple-500/25">
+                  <Bitcoin className="h-12 w-12 text-white" />
+                </div>
+                <div className="absolute -inset-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl opacity-20 blur-lg"></div>
+              </div>
+              
+              <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">
+                BTCBOT24
+              </h1>
+              
+              <p className="text-xl text-gray-200 mb-12 leading-relaxed">
+                The future of cryptocurrency trading is here. Join thousands of traders who trust our advanced platform.
+              </p>
+              
+              <div className="space-y-6 text-left">
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="flex items-center space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20"
+                >
+                  <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                  <span className="text-gray-200 font-medium">Advanced Trading Tools</span>
+                </motion.div>
+                
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex items-center space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20"
+                >
+                  <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
+                  <span className="text-gray-200 font-medium">Real-time Market Data</span>
+                </motion.div>
+                
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.7 }}
+                  className="flex items-center space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20"
+                >
+                  <div className="w-3 h-3 bg-gradient-to-r from-pink-400 to-blue-400 rounded-full"></div>
+                  <span className="text-gray-200 font-medium">Secure & Reliable Platform</span>
+                </motion.div>
+              </div>
+            </motion.div>
           </div>
         </div>
 
-        {/* Login Form */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20"
-        >
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={form.email}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
-                placeholder="Enter your email"
-              />
+        {/* Right Side - Login Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+            className="w-full max-w-md"
+          >
+            {/* Mobile Logo */}
+            <div className="lg:hidden text-center mb-8">
+              <div className="relative">
+                <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-2xl">
+                  <Bitcoin className="h-10 w-10 text-white" />
+                </div>
+                <div className="absolute -inset-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl opacity-20 blur-lg"></div>
+              </div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">BTCBOT24</h1>
             </div>
 
-            {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleInputChange}
-                  required
-                  autoComplete="current-password"
-                  style={{ 
-                    WebkitTextSecurity: showPassword ? 'none' : 'disc',
-                  } as React.CSSProperties}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all pr-12 [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-caps-lock-indicator]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden [&::-ms-reveal]:hidden [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden"
-                  placeholder="Enter your password"
-                />
+            {/* Form Container */}
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20">
+              {/* Header */}
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+                <p className="text-gray-600">Sign in to your account to continue</p>
+                <div className="mt-4 inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-full">
+                  <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mr-2"></div>
+                  <span className="text-sm text-gray-700 font-medium">User Login</span>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Email Field */}
+                <div className="space-y-2">
+                  <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={form.email}
+                      onChange={handleInputChange}
+                      required
+                      className="login-input w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-xl placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all duration-200"
+                      placeholder="Enter your email address"
+                      style={{ 
+                        color: '#111827 !important',
+                        backgroundColor: '#ffffff !important',
+                        WebkitTextFillColor: '#111827 !important'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Password Field */}
+                <div className="space-y-2">
+                  <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
+                    Password
+                  </label>
+                  <div className="relative overflow-hidden rounded-xl">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                      <Lock className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      name="password"
+                      value={form.password}
+                      onChange={handleInputChange}
+                      required
+                      autoComplete="current-password"
+                      className="login-input w-full pl-12 pr-12 py-4 bg-white border border-gray-200 rounded-xl placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all duration-200"
+                      placeholder="Enter your password"
+                      style={{ 
+                        color: '#111827 !important',
+                        backgroundColor: '#ffffff !important',
+                        WebkitTextFillColor: '#111827 !important'
+                      }}
+                    />
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 z-10">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none p-1"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Error/Success Message */}
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex items-center space-x-3 rounded-xl p-4 ${
+                      isSuccess 
+                        ? 'text-green-700 bg-green-50 border border-green-200' 
+                        : 'text-red-700 bg-red-50 border border-red-200'
+                    }`}
+                  >
+                    {isSuccess ? (
+                      <CheckCircle className="h-5 w-5 flex-shrink-0" />
+                    ) : (
+                      <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                    )}
+                    <span className="text-sm font-medium">{error}</span>
+                  </motion.div>
+                )}
+
+                {/* Submit Button */}
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg shadow-purple-500/25"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {isLoading ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Signing In...</span>
+                    </div>
+                  ) : (
+                    'Sign In'
+                  )}
                 </button>
+              </form>
+
+              {/* Links */}
+              <div className="mt-8 space-y-4">
+                <div className="text-center">
+                  <Link 
+                    href="/forgot-password" 
+                    className="login-link text-sm font-medium transition-colors"
+                  >
+                    Forgot your password?
+                  </Link>
+                </div>
+                
+                <div className="border-t border-gray-200 pt-6 text-center">
+                  <p className="text-sm text-gray-600">
+                    Don't have an account?{' '}
+                    <Link 
+                      href="/register" 
+                      className="login-link font-semibold transition-colors"
+                    >
+                      Create one here
+                    </Link>
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Error/Success Message */}
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`flex items-center space-x-2 rounded-lg p-3 ${
-                  isSuccess 
-                    ? 'text-green-400 bg-green-400/10 border border-green-400/20' 
-                    : 'text-red-400 bg-red-400/10 border border-red-400/20'
-                }`}
-              >
-                {isSuccess ? (
-                  <CheckCircle className="h-5 w-5 flex-shrink-0" />
-                ) : (
-                  <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                )}
-                <span className="text-sm">{error}</span>
-              </motion.div>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Signing In...</span>
-                </div>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-          </form>
-
-          {/* Links */}
-          <div className="mt-6 space-y-4">
-            <div className="text-center">
+            {/* Back to Home */}
+            <div className="mt-8 text-center">
               <Link 
-                href="/forgot-password" 
-                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                href="/" 
+                className="text-sm text-gray-300 hover:text-white transition-colors inline-flex items-center space-x-2"
               >
-                Forgot your password?
+                <span>←</span>
+                <span>Back to Home</span>
               </Link>
             </div>
-            
-            <div className="border-t border-white/20 pt-4 text-center">
-              <p className="text-sm text-gray-400">
-                Don't have an account?{' '}
-                <Link 
-                  href="/register" 
-                  className="text-blue-400 hover:text-blue-300 transition-colors"
-                >
-                  Sign up here
-                </Link>
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Back to Home */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="mt-6 text-center"
-        >
-          <Link 
-            href="/" 
-            className="text-sm text-gray-400 hover:text-white transition-colors mb-4 inline-block"
-          >
-            ← Back to Home
-          </Link>
-          
-          {/* Legal Links */}
-          <div className="flex justify-center space-x-4 text-xs text-gray-500">
-            <Link 
-              href="/terms-and-conditions" 
-              target="_blank"
-              className="hover:text-gray-300 transition-colors"
-            >
-              Terms & Conditions
-            </Link>
-            <span>•</span>
-            <Link 
-              href="/privacy-policy" 
-              target="_blank"
-              className="hover:text-gray-300 transition-colors"
-            >
-              Privacy Policy
-            </Link>
-          </div>
-        </motion.div>
-      </motion.div>
+          </motion.div>
+        </div>
+      </div>
 
       {/* Verification Prompt Modal */}
       <VerificationPromptModal

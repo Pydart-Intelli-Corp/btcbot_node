@@ -83,7 +83,7 @@ const TradeFromAnywhereSection = () => {
                     <div className={`relative p-3 rounded-xl shadow-lg transition-all duration-500 ${
                       activeCity === index 
                         ? 'bg-blue-600 text-white scale-110' 
-                        : 'bg-white text-gray-800 border border-gray-200'
+                        : 'bg-white text-gray-900 border border-gray-200'
                     }`}>
                       <div className="flex items-center space-x-2">
                         <MapPin className="w-4 h-4" />

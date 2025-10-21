@@ -303,7 +303,7 @@ const TradingPortfoliosSection = () => {
               </Link>
               <Link
                 href="/about"
-                className="px-8 py-3 border-2 border-blue-500 text-blue-600 font-semibold rounded-lg hover:bg-blue-500 hover:text-white transition-all transform hover:scale-105"
+                className="px-8 py-3 border-2 border-blue-500 text-white bg-blue-500 font-semibold rounded-lg hover:bg-blue-600 hover:border-blue-600 transition-all transform hover:scale-105"
               >
                 Learn More
               </Link>

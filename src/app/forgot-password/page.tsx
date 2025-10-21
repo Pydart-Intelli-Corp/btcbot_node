@@ -6,6 +6,68 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { handleApiResponse } from '../../utils/errorHandler';
 
+// Custom CSS to force text visibility
+const inputStyle = `
+  .forgot-password-input {
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+  .forgot-password-input:focus {
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+  .forgot-password-input::-webkit-autofill,
+  .forgot-password-input::-webkit-autofill:hover,
+  .forgot-password-input::-webkit-autofill:focus,
+  .forgot-password-input::-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #111827 !important;
+    color: #111827 !important;
+  }
+  
+  /* Force link visibility */
+  .forgot-password-link {
+    color: #4f46e5 !important;
+    text-decoration: none !important;
+  }
+  .forgot-password-link:hover {
+    color: #4338ca !important;
+    text-decoration: none !important;
+  }
+  .forgot-password-link:visited {
+    color: #4f46e5 !important;
+  }
+  .forgot-password-link:active {
+    color: #3730a3 !important;
+  }
+  
+  /* Override any global link styles */
+  a.forgot-password-link,
+  a.forgot-password-link:hover,
+  a.forgot-password-link:focus,
+  a.forgot-password-link:active,
+  a.forgot-password-link:visited {
+    color: #4f46e5 !important;
+    opacity: 1 !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: #4f46e5 !important;
+  }
+  a.forgot-password-link:hover {
+    color: #4338ca !important;
+    -webkit-text-fill-color: #4338ca !important;
+  }
+`;
+
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.innerText = inputStyle;
+  document.head.appendChild(styleSheet);
+}
+
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -144,9 +206,14 @@ const ForgotPasswordPage = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 transition-all duration-200"
+                className="forgot-password-input relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 transition-all duration-200 bg-white"
                 placeholder="Enter your email address"
                 disabled={isLoading || isSuccess}
+                style={{
+                  color: '#111827 !important',
+                  backgroundColor: '#ffffff !important',
+                  WebkitTextFillColor: '#111827 !important'
+                }}
               />
             </div>
 
@@ -187,7 +254,7 @@ const ForgotPasswordPage = () => {
             >
               <Link
                 href="/login"
-                className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
+                className="forgot-password-link inline-flex items-center text-sm font-medium transition-colors duration-200"
               >
                 <span className="mr-2">←</span>
                 Back to Login
@@ -199,7 +266,7 @@ const ForgotPasswordPage = () => {
           <div className="mt-6 text-center text-sm text-gray-600">
             <p>
               Remember your password?{' '}
-              <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <Link href="/login" className="forgot-password-link font-medium">
                 Sign in here
               </Link>
             </p>
@@ -215,7 +282,7 @@ const ForgotPasswordPage = () => {
         >
           <p>
             Need help?{' '}
-            <Link href="/contact" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/contact" className="forgot-password-link font-medium">
               Contact Support
             </Link>
           </p>

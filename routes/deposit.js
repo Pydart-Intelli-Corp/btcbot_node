@@ -2,6 +2,7 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { Op } = require('sequelize');
 const { User, Portfolio, Transaction } = require('../models');
+const { sequelize } = require('../config/database');
 const { 
   asyncHandler, 
   validationError,
@@ -14,6 +15,99 @@ const QRCode = require('qrcode');
 const crypto = require('crypto');
 
 const router = express.Router();
+
+// Import AdminWallet model from adminWallets route
+const AdminWallet = sequelize.define('AdminWallet', {
+  id: {
+    type: sequelize.Sequelize.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  walletType: {
+    type: sequelize.Sequelize.STRING(20),
+    allowNull: false,
+    validate: {
+      isIn: [['USDT', 'BTC', 'ETH', 'BNB', 'LTC', 'DOGE']]
+    }
+  },
+  walletAddress: {
+    type: sequelize.Sequelize.STRING(255),
+    allowNull: false,
+    validate: {
+      len: [25, 255]
+    }
+  },
+  qrCodeImage: {
+    type: sequelize.Sequelize.TEXT,
+    allowNull: true
+  },
+  isActive: {
+    type: sequelize.Sequelize.BOOLEAN,
+    defaultValue: true
+  },
+  description: {
+    type: sequelize.Sequelize.STRING(500),
+    allowNull: false
+  },
+  networkType: {
+    type: sequelize.Sequelize.STRING(50),
+    allowNull: false,
+    defaultValue: 'TRC20'
+  },
+  createdBy: {
+    type: sequelize.Sequelize.INTEGER,
+    allowNull: false
+  }
+}, {
+  tableName: 'admin_wallets',
+  timestamps: true,
+  underscored: true
+});
+
+// @desc    Get available payment methods and wallet addresses
+// @route   GET /api/deposit/payment-methods
+// @access  Private
+const getPaymentMethods = asyncHandler(async (req, res) => {
+  try {
+    // Get active admin wallets
+    const activeWallets = await AdminWallet.findAll({
+      where: { isActive: true },
+      attributes: ['id', 'walletType', 'walletAddress', 'qrCodeImage', 'networkType', 'description'],
+      order: [['wallet_type', 'ASC']]
+    });
+
+    if (activeWallets.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No payment methods are currently available. Please contact support.'
+      });
+    }
+
+    // Format for frontend
+    const paymentMethods = activeWallets.map(wallet => ({
+      id: wallet.id,
+      currency: wallet.walletType,
+      walletAddress: wallet.walletAddress,
+      qrCodeImage: wallet.qrCodeImage,
+      networkType: wallet.networkType,
+      description: wallet.description
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: paymentMethods,
+      count: paymentMethods.length,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.logError('GET_PAYMENT_METHODS_ERROR', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching payment methods'
+    });
+  }
+});
 
 // @desc    Get deposit information for a portfolio subscription
 // @route   POST /api/deposit/initialize
@@ -78,18 +172,55 @@ const initializeDeposit = asyncHandler(async (req, res) => {
     // Generate unique transaction ID
     const transactionId = 'DEP_' + Date.now() + '_' + crypto.randomBytes(4).toString('hex').toUpperCase();
 
-    // Create wallet addresses for different cryptocurrencies
-    const walletAddresses = {
-      BTC: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
-      USDT: '0x742d35cc6731c0532925a3b8d4c0a4df5c3f1234',
-      ETH: '0x742d35cc6731c0532925a3b8d4c0a4df5c3f1234',
-      BNB: 'bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2'
+    // Get active admin wallets from AdminWallet table
+    const activeWallets = await AdminWallet.findAll({
+      where: { isActive: true },
+      attributes: ['walletType', 'walletAddress', 'qrCodeImage', 'networkType'],
+      order: [['wallet_type', 'ASC']]
+    });
+
+    // Build wallet addresses object
+    const walletAddresses = {};
+    const qrCodes = {};
+    const availablePaymentMethods = [];
+
+    // Default wallet addresses as fallback
+    const defaultWallets = {
+      'BTC': '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
+      'USDT': 'TQn9Y2khEsLJW1ChVWFMSMeRDow5oREqwm',
+      'ETH': '0x742d35Cc69B24E5e5b25E5b8F12B7a09F8d6b8c4',
+      'BNB': 'bnb1jxfh2g85q3v0tdq56fnevx6xcxtcnhtsmcu64k'
     };
 
-    // Generate QR codes for each wallet
-    const qrCodes = {};
-    for (const [currency, address] of Object.entries(walletAddresses)) {
-      qrCodes[currency] = await QRCode.toDataURL(address);
+    if (activeWallets.length > 0) {
+      // Use admin-configured wallets
+      activeWallets.forEach(wallet => {
+        walletAddresses[wallet.walletType] = wallet.walletAddress;
+        availablePaymentMethods.push(wallet.walletType);
+        
+        if (wallet.qrCodeImage) {
+          qrCodes[wallet.walletType] = wallet.qrCodeImage;
+        }
+      });
+    } else {
+      // Fallback to default wallets if no admin wallets configured
+      Object.entries(defaultWallets).forEach(([currency, address]) => {
+        walletAddresses[currency] = address;
+        availablePaymentMethods.push(currency);
+      });
+    }
+
+    // Generate QR codes for wallets that don't have uploaded QR codes
+    for (const currency of availablePaymentMethods) {
+      if (!qrCodes[currency]) {
+        try {
+          qrCodes[currency] = await QRCode.toDataURL(walletAddresses[currency]);
+        } catch (error) {
+          console.error(`Error generating QR code for ${currency}:`, error);
+          // Use a placeholder or skip this currency
+          qrCodes[currency] = `data:image/svg+xml;base64,${Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="#f0f0f0"/><text x="100" y="100" text-anchor="middle" font-size="12">QR Code Error</text></svg>').toString('base64')}`;
+        }
+      }
     }
 
     // Calculate fees and totals
@@ -106,9 +237,9 @@ const initializeDeposit = asyncHandler(async (req, res) => {
       platformFee: platformFee,
       totalAmount: totalAmount,
       walletAddresses: walletAddresses,
-      qrCodes: qrCodes,
-      paymentMethods: ['BTC', 'USDT', 'ETH', 'BNB'],
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+        qrCodes: qrCodes,
+        paymentMethods: availablePaymentMethods,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
     };
 
     const transaction = await Transaction.create({
@@ -147,7 +278,7 @@ const initializeDeposit = asyncHandler(async (req, res) => {
         totalAmount: totalAmount,
         walletAddresses: walletAddresses,
         qrCodes: qrCodes,
-        paymentMethods: ['BTC', 'USDT', 'ETH', 'BNB'],
+        paymentMethods: availablePaymentMethods,
         expiresAt: depositInfo.expiresAt,
         instructions: [
           'Choose your preferred cryptocurrency payment method',
@@ -343,6 +474,7 @@ const cancelDeposit = asyncHandler(async (req, res) => {
 });
 
 // Register routes
+router.get('/payment-methods', protect, getPaymentMethods);
 router.post('/initialize', protect, [
   body('portfolioId').isInt().withMessage('Valid portfolio ID is required'),
   body('investmentAmount').isFloat({ min: 1 }).withMessage('Valid investment amount is required')
@@ -350,7 +482,19 @@ router.post('/initialize', protect, [
 
 router.post('/proof', protect, [
   body('transactionId').notEmpty().withMessage('Transaction ID is required'),
-  body('paymentMethod').isIn(['BTC', 'USDT', 'ETH', 'BNB']).withMessage('Valid payment method is required'),
+  body('paymentMethod').custom(async (value) => {
+    // Validate payment method against active admin wallets
+    const activeWallet = await AdminWallet.findOne({
+      where: { 
+        walletType: value.toUpperCase(),
+        isActive: true 
+      }
+    });
+    if (!activeWallet) {
+      throw new Error('Invalid or inactive payment method');
+    }
+    return true;
+  }),
   body('transactionHash').optional().trim(),
   body('proofImage').optional().trim(),
   body('notes').optional().trim().isLength({ max: 500 })

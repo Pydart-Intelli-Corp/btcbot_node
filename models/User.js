@@ -81,6 +81,13 @@ const User = sequelize.define('User', {
       this.setDataValue('walletQRCode', value ? value.trim() : value);
     }
   },
+  qrCodeUrl: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    set(value) {
+      this.setDataValue('qrCodeUrl', value ? value.trim() : value);
+    }
+  },
   
   // Account Status
   isActive: {

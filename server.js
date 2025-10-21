@@ -29,6 +29,8 @@ const adminRoutes = require('./routes/admin');
 const depositRoutes = require('./routes/deposit');
 const adminDepositRoutes = require('./routes/adminDeposits');
 const adminReferralRoutes = require('./routes/adminReferrals');
+const adminWalletRoutes = require('./routes/adminWallets');
+const testCryptoRoutes = require('./routes/testCrypto');
 
 // Database connection
 const connectDatabase = async () => {
@@ -221,7 +223,9 @@ const startServer = async () => {
     app.use('/api/admin', adminRoutes);
     app.use('/api/admin/deposits', adminDepositRoutes);
     app.use('/api/admin/referrals', adminReferralRoutes);
+    app.use('/api/admin/wallets', adminWalletRoutes);
     app.use('/api/deposit', depositRoutes);
+    app.use('/api/test', testCryptoRoutes);
 
     // API documentation endpoint (basic)
     app.get('/api', (req, res) => {

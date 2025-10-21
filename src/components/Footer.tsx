@@ -36,7 +36,7 @@ const Footer = () => {
             </Link>
             <Link
               href="/register"
-              className="px-8 py-4 border-2 border-blue-500 text-blue-400 font-semibold rounded-lg hover:bg-blue-500 hover:text-white transition-all transform hover:scale-105"
+              className="px-8 py-4 border-2 border-blue-500 text-blue-600 font-semibold rounded-lg hover:bg-blue-500 hover:text-white transition-all transform hover:scale-105"
             >
               Sign up
             </Link>
@@ -49,25 +49,25 @@ const Footer = () => {
             <div className="text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-2">
               $25
             </div>
-            <div className="text-gray-400 text-lg">Annual License</div>
+            <div className="text-gray-600 text-lg">Annual License</div>
           </div>
           <div className="text-center">
             <div className="text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-600 mb-2">
               24/7
             </div>
-            <div className="text-gray-400 text-lg">AI Trading</div>
+            <div className="text-gray-600 text-lg">AI Trading</div>
           </div>
           <div className="text-center">
             <div className="text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 mb-2">
               2.25%
             </div>
-            <div className="text-gray-400 text-lg">Max Daily ROI</div>
+            <div className="text-gray-600 text-lg">Max Daily ROI</div>
           </div>
           <div className="text-center">
             <div className="text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-600 mb-2">
               400%
             </div>
-            <div className="text-gray-400 text-lg">Max Total Return</div>
+            <div className="text-gray-600 text-lg">Max Total Return</div>
           </div>
         </div>
       </div>
@@ -84,7 +84,7 @@ const Footer = () => {
                 </div>
                 <span className="text-xl font-bold text-white">BTCBOT24</span>
               </div>
-              <p className="text-gray-400 mb-6 leading-relaxed">
+              <p className="text-gray-600 mb-6 leading-relaxed">
                 Next-generation AI Arbitrage Trading Platform enabling investors to earn consistent 
                 passive income through automated trading bots with 24/7 market analysis and execution.
               </p>
@@ -224,7 +224,7 @@ const Footer = () => {
                 </button>
                 <button 
                   onClick={() => setShowCookieNotice(false)}
-                  className="px-4 py-2 text-gray-400 hover:text-gray-300 text-sm transition-colors"
+                  className="px-4 py-2 text-white bg-gray-600 hover:text-white hover:bg-gray-700 text-sm transition-colors rounded-lg"
                 >
                   ✕
                 </button>

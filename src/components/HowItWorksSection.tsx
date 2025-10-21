@@ -95,7 +95,7 @@ const HowItWorksSection = () => {
             <button className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105">
               Get Started Now
             </button>
-            <button className="px-8 py-4 border-2 border-blue-500 text-blue-600 font-semibold rounded-lg hover:bg-blue-500 hover:text-white transition-all transform hover:scale-105">
+            <button className="px-8 py-4 border-2 border-blue-500 text-white bg-blue-500 font-semibold rounded-lg hover:bg-blue-600 hover:border-blue-600 transition-all transform hover:scale-105">
               Learn More
             </button>
           </div>

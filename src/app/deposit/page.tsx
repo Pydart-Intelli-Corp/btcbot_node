@@ -15,6 +15,15 @@ import {
   QrCodeIcon
 } from '@heroicons/react/24/outline';
 
+interface PaymentMethod {
+  id: number;
+  currency: string;
+  walletAddress: string;
+  qrCodeImage: string;
+  networkType: string;
+  description: string;
+}
+
 interface DepositData {
   transactionId: string;
   portfolioId: number;
@@ -49,8 +58,9 @@ interface Portfolio {
 export default function DepositPage() {
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [depositData, setDepositData] = useState<DepositData | null>(null);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [investmentAmount, setInvestmentAmount] = useState('');
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('USDT');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState<'amount' | 'payment' | 'proof'>('amount');
@@ -67,8 +77,33 @@ export default function DepositPage() {
   useEffect(() => {
     if (portfolioId) {
       fetchPortfolio(portfolioId);
+      fetchPaymentMethods();
     }
   }, [portfolioId]);
+
+  const fetchPaymentMethods = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+
+      const response = await fetch('/api/deposit/payment-methods', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setPaymentMethods(data.data);
+        // Set first available payment method as default
+        if (data.data.length > 0 && !selectedPaymentMethod) {
+          setSelectedPaymentMethod(data.data[0].currency);
+        }
+      }
+    } catch (err: any) {
+      console.error('Error fetching payment methods:', err);
+    }
+  };
 
   const fetchPortfolio = async (id: string) => {
     try {
@@ -314,64 +349,116 @@ export default function DepositPage() {
                 <div className="bg-white rounded-lg shadow p-6">
                   <h2 className="text-xl font-semibold text-gray-900 mb-6">Choose Payment Method</h2>
                   
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    {depositData.paymentMethods.map((method) => (
+                  {paymentMethods.length === 0 ? (
+                    <div className="text-center py-8">
+                      <ExclamationTriangleIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Payment Methods Available</h3>
+                      <p className="text-gray-600 mb-4">
+                        Payment methods are currently being configured. Please contact support for assistance.
+                      </p>
                       <button
-                        key={method}
-                        onClick={() => setSelectedPaymentMethod(method)}
-                        className={`p-4 border-2 rounded-lg text-center transition-colors ${
-                          selectedPaymentMethod === method
-                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                        onClick={fetchPaymentMethods}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                       >
-                        <div className="font-semibold">{method}</div>
+                        Refresh
                       </button>
-                    ))}
-                  </div>
-
-                  {/* Payment Details */}
-                  <div className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-medium">Payment Details</h3>
-                      <span className="text-sm text-gray-600">
-                        Expires: {new Date(depositData.expiresAt).toLocaleString()}
-                      </span>
                     </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        {paymentMethods.map((method) => (
+                          <button
+                            key={method.id}
+                            onClick={() => setSelectedPaymentMethod(method.currency)}
+                            className={`p-4 border-2 rounded-lg text-center transition-colors ${
+                              selectedPaymentMethod === method.currency
+                                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="font-semibold">{method.currency}</div>
+                            <div className="text-xs text-gray-500 mt-1">{method.networkType}</div>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Payment Details */}
+                      <div className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-medium">Payment Details</h3>
+                          <span className="text-sm text-gray-600">
+                            Expires: {new Date(depositData.expiresAt).toLocaleString()}
+                          </span>
+                        </div>
 
                     <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Wallet Address ({selectedPaymentMethod})
-                        </label>
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="text"
-                            value={depositData.walletAddresses[selectedPaymentMethod]}
-                            readOnly
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm"
-                          />
-                          <button
-                            onClick={() => copyToClipboard(depositData.walletAddresses[selectedPaymentMethod])}
-                            className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
-                          >
-                            <ClipboardIcon className="h-5 w-5" />
-                          </button>
-                        </div>
-                      </div>
+                      {/* Show payment method info */}
+                      {paymentMethods.length > 0 && (
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Wallet Address ({selectedPaymentMethod})
+                            </label>
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={
+                                  paymentMethods.find(m => m.currency === selectedPaymentMethod)?.walletAddress || 
+                                  depositData.walletAddresses[selectedPaymentMethod] || 
+                                  ''
+                                }
+                                readOnly
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm"
+                              />
+                              <button
+                                onClick={() => copyToClipboard(
+                                  paymentMethods.find(m => m.currency === selectedPaymentMethod)?.walletAddress || 
+                                  depositData.walletAddresses[selectedPaymentMethod] || 
+                                  ''
+                                )}
+                                className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                              >
+                                <ClipboardIcon className="h-5 w-5" />
+                              </button>
+                            </div>
+                          </div>
 
-                      <div className="text-center">
-                        <div className="inline-block p-4 bg-white border border-gray-200 rounded-lg">
-                          <img
-                            src={depositData.qrCodes[selectedPaymentMethod]}
-                            alt={`${selectedPaymentMethod} QR Code`}
-                            className="w-48 h-48"
-                          />
-                        </div>
-                        <p className="text-sm text-gray-600 mt-2">
-                          Scan QR code to copy wallet address
-                        </p>
-                      </div>
+                          <div className="text-center">
+                            <div className="inline-block p-4 bg-white border border-gray-200 rounded-lg">
+                              <img
+                                src={
+                                  paymentMethods.find(m => m.currency === selectedPaymentMethod)?.qrCodeImage || 
+                                  depositData.qrCodes[selectedPaymentMethod] || 
+                                  ''
+                                }
+                                alt={`${selectedPaymentMethod} QR Code`}
+                                className="w-48 h-48"
+                                onError={(e) => {
+                                  console.error('QR Code image failed to load');
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            </div>
+                            <p className="text-sm text-gray-600 mt-2">
+                              Scan QR code to copy wallet address
+                            </p>
+                          </div>
+
+                          {/* Network type and description */}
+                          {paymentMethods.find(m => m.currency === selectedPaymentMethod) && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                              <div className="text-sm text-blue-800">
+                                <p className="font-medium mb-1">
+                                  Network: {paymentMethods.find(m => m.currency === selectedPaymentMethod)?.networkType}
+                                </p>
+                                <p className="text-xs">
+                                  {paymentMethods.find(m => m.currency === selectedPaymentMethod)?.description}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
 
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                         <div className="flex">
@@ -387,15 +474,18 @@ export default function DepositPage() {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                        </div>
+                      </div>
 
-                  <button
-                    onClick={() => setStep('proof')}
-                    className="w-full mt-6 bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors"
-                  >
-                    I've Sent the Payment
-                  </button>
+                      <button
+                        onClick={() => setStep('proof')}
+                        disabled={paymentMethods.length === 0}
+                        className="w-full mt-6 bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        I've Sent the Payment
+                      </button>
+                    </>
+                  )}
                 </div>
               </motion.div>
             )}

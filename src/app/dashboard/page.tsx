@@ -37,6 +37,34 @@ import {
   RefreshCw
 } from 'lucide-react';
 
+// Custom CSS to force text visibility in dashboard inputs
+const dashboardInputStyle = `
+  .dashboard-input {
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+  .dashboard-input:focus {
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+  .dashboard-input::-webkit-autofill,
+  .dashboard-input::-webkit-autofill:hover,
+  .dashboard-input::-webkit-autofill:focus,
+  .dashboard-input::-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #111827 !important;
+    color: #111827 !important;
+  }
+`;
+
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.innerText = dashboardInputStyle;
+  document.head.appendChild(styleSheet);
+}
+
 interface DashboardUser {
   id: number;
   email: string;
@@ -350,7 +378,7 @@ const Dashboard: React.FC = () => {
                   <div className="text-sm text-gray-600">
                     ROI: <span className="text-green-600 font-semibold">+18.5%</span>
                   </div>
-                  <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                  <button className="text-white bg-blue-600 hover:bg-blue-700 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
                     View Details →
                   </button>
                 </div>
@@ -403,7 +431,12 @@ const Dashboard: React.FC = () => {
                     type="text"
                     value={referralLink}
                     readOnly
-                    className="flex-1 px-4 py-3 border border-gray-200 rounded-lg bg-white text-sm font-mono"
+                    className="dashboard-input flex-1 px-4 py-3 border border-gray-200 rounded-lg bg-white text-sm font-mono"
+                    style={{
+                      color: '#111827 !important',
+                      backgroundColor: '#ffffff !important',
+                      WebkitTextFillColor: '#111827 !important'
+                    }}
                   />
                   <button
                     onClick={copyReferralLink}
@@ -616,19 +649,12 @@ const Dashboard: React.FC = () => {
             >
               <h3 className="text-lg font-bold text-gray-900 mb-4">Trading Bot Status</h3>
               <div className="text-center">
-                <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium mb-4 ${
-                  user.subscriptionStatus === 'active' ? 'bg-green-100 text-green-800' :
-                  user.subscriptionStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
-                  <Activity className="h-4 w-4 mr-2" />
-                  {user.subscriptionStatus === 'none' ? 'No Active Plan' : 
-                   user.subscriptionStatus === 'active' ? 'Bot Active' : 
-                   user.subscriptionStatus.charAt(0).toUpperCase() + user.subscriptionStatus.slice(1)}
-                </div>
-                
                 {user.subscriptionStatus === 'active' ? (
                   <div className="bg-green-50 rounded-lg p-4">
+                    <div className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium mb-3 bg-green-100 text-green-800">
+                      <Activity className="h-4 w-4 mr-2 text-green-600" />
+                      Bot Active
+                    </div>
                     <p className="text-sm text-green-700 font-medium mb-2">
                       🤖 Your bot is actively trading
                     </p>
@@ -637,15 +663,19 @@ const Dashboard: React.FC = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-700 font-medium mb-2">
-                      Choose a plan to activate your bot
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium mb-3 bg-red-100 text-red-800 border border-red-200">
+                      <Activity className="h-4 w-4 mr-2 text-red-600" />
+                      <span className="text-red-600">No Active Plan</span>
+                    </div>
+                    <p className="text-xs text-red-600 mb-3">
+                      Choose a plan to start earning
                     </p>
                     <button 
                       onClick={() => router.push('/plans')}
-                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                      className="text-xs text-green-600 hover:text-green-700 font-medium bg-white px-3 py-1 rounded-md border border-green-200 hover:bg-green-50 transition-colors"
                     >
-                      View Available Plans →
+                      <span className="text-green-600">View Available Plans →</span>
                     </button>
                   </div>
                 )}

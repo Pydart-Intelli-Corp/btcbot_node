@@ -6,6 +6,68 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { handleApiResponse } from '../../utils/errorHandler';
 
+// Custom CSS to force text visibility
+const inputStyle = `
+  .reset-password-input {
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+  .reset-password-input:focus {
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+  .reset-password-input::-webkit-autofill,
+  .reset-password-input::-webkit-autofill:hover,
+  .reset-password-input::-webkit-autofill:focus,
+  .reset-password-input::-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #111827 !important;
+    color: #111827 !important;
+  }
+  
+  /* Force link visibility */
+  .reset-password-link {
+    color: #4f46e5 !important;
+    text-decoration: none !important;
+  }
+  .reset-password-link:hover {
+    color: #4338ca !important;
+    text-decoration: none !important;
+  }
+  .reset-password-link:visited {
+    color: #4f46e5 !important;
+  }
+  .reset-password-link:active {
+    color: #3730a3 !important;
+  }
+  
+  /* Override any global link styles */
+  a.reset-password-link,
+  a.reset-password-link:hover,
+  a.reset-password-link:focus,
+  a.reset-password-link:active,
+  a.reset-password-link:visited {
+    color: #4f46e5 !important;
+    opacity: 1 !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: #4f46e5 !important;
+  }
+  a.reset-password-link:hover {
+    color: #4338ca !important;
+    -webkit-text-fill-color: #4338ca !important;
+  }
+`;
+
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.innerText = inputStyle;
+  document.head.appendChild(styleSheet);
+}
+
 const ResetPasswordContent = () => {
   const [formData, setFormData] = useState({
     password: '',
@@ -232,9 +294,14 @@ const ResetPasswordContent = () => {
                     required
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="relative block w-full px-4 py-3 pr-12 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 transition-all duration-200"
+                    className="reset-password-input relative block w-full px-4 py-3 pr-12 border border-gray-300 placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 transition-all duration-200 bg-white"
                     placeholder="Enter your new password"
                     disabled={isLoading}
+                    style={{
+                      color: '#111827 !important',
+                      backgroundColor: '#ffffff !important',
+                      WebkitTextFillColor: '#111827 !important'
+                    }}
                   />
                   <button
                     type="button"
@@ -263,9 +330,14 @@ const ResetPasswordContent = () => {
                     required
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="relative block w-full px-4 py-3 pr-12 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 transition-all duration-200"
+                    className="reset-password-input relative block w-full px-4 py-3 pr-12 border border-gray-300 placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 transition-all duration-200 bg-white"
                     placeholder="Confirm your new password"
                     disabled={isLoading}
+                    style={{
+                      color: '#111827 !important',
+                      backgroundColor: '#ffffff !important',
+                      WebkitTextFillColor: '#111827 !important'
+                    }}
                   />
                   <button
                     type="button"
@@ -310,7 +382,7 @@ const ResetPasswordContent = () => {
             >
               <Link
                 href="/login"
-                className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
+                className="reset-password-link inline-flex items-center text-sm font-medium transition-colors duration-200"
               >
                 <span className="mr-2">←</span>
                 Back to Login
@@ -328,7 +400,7 @@ const ResetPasswordContent = () => {
         >
           <p>
             Need help?{' '}
-            <Link href="/contact" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/contact" className="reset-password-link font-medium">
               Contact Support
             </Link>
           </p>
