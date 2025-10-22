@@ -439,16 +439,10 @@ const AdminWalletSettings = () => {
             className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
           >
             <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
+              <div className="mb-6">
                 <h3 className="text-xl font-semibold text-gray-900">
                   {editingWallet ? 'Edit Wallet' : 'Add New Wallet'}
                 </h3>
-                <button
-                  onClick={resetForm}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  ×
-                </button>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -575,7 +569,7 @@ const AdminWalletSettings = () => {
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex-1 px-4 py-2 bg-red-500 text-white border-2 border-red-600 rounded-lg hover:bg-red-600 hover:border-red-700 transition-colors font-medium shadow-md"
                   >
                     Cancel
                   </button>

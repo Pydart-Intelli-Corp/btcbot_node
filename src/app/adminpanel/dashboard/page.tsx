@@ -21,12 +21,13 @@ import {
   XCircle,
   Clock,
 } from 'lucide-react';
-import UsersManagement from '../../../components/admin/UsersManagement';
-import DepositManagement from '../../../components/admin/DepositManagement';
-import WithdrawalsManagement from '../../../components/admin/WithdrawalsManagement';
-import ReferralManagement from '../../../components/admin/ReferralManagement';
-import AdminWalletSettings from '@/components/admin/AdminWalletSettings';
-import AdminDepositsManagement from '@/components/admin/AdminDepositsManagement';
+import {
+  UsersManagement,
+  WithdrawalsManagement,
+  ReferralManagement,
+  AdminWalletSettings,
+} from '@/components';
+import AdminPaymentManagement from '@/components/admin/AdminPaymentManagement';
 
 interface User {
   id: number;
@@ -138,6 +139,7 @@ const AdminDashboard = () => {
       path: 'withdrawals',
       count: stats?.pendingApprovals.withdrawals || 0
     },
+    { name: 'Payment Management', icon: DollarSign, path: 'payment-management' },
     { name: 'Portfolios', icon: TrendingUp, path: 'portfolios' },
     { name: 'Referrals', icon: UserCheck, path: 'referrals' },
     { name: 'Wallet Settings', icon: Settings, path: 'wallet-settings' },
@@ -439,9 +441,7 @@ const AdminDashboard = () => {
             <UsersManagement />
           )}
 
-          {activeSection === 'deposits' && (
-            <DepositManagement />
-          )}
+
 
           {activeSection === 'withdrawals' && (
             <WithdrawalsManagement />
@@ -455,12 +455,12 @@ const AdminDashboard = () => {
             <AdminWalletSettings />
           )}
 
-          {activeSection === 'deposit-management' && (
-            <AdminDepositsManagement />
+          {activeSection === 'payment-management' && (
+            <AdminPaymentManagement />
           )}
 
           {/* Other sections placeholder */}
-          {!['dashboard', 'users', 'deposits', 'withdrawals', 'referrals', 'wallet-settings', 'deposit-management'].includes(activeSection) && (
+          {!['dashboard', 'users', 'deposits', 'withdrawals', 'referrals', 'wallet-settings', 'deposit-management', 'payment-management'].includes(activeSection) && (
             <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl shadow-2xl border border-slate-700 p-8 text-center">
               <div className="mb-4">
                 <Settings className="h-12 w-12 text-gray-400 mx-auto" />

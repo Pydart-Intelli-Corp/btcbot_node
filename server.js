@@ -18,19 +18,18 @@ const { errorHandler, notFound } = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 
 // Import routes
-const authRoutes = require('./routes/auth');
-const userAuthRoutes = require('./routes/userAuth');
-const adminAuthRoutes = require('./routes/adminAuth');
-const userRoutes = require('./routes/user');
-const portfolioRoutes = require('./routes/portfolio');
-const transactionRoutes = require('./routes/transaction');
-const affiliateRoutes = require('./routes/affiliate');
-const adminRoutes = require('./routes/admin');
-const depositRoutes = require('./routes/deposit');
-const adminDepositRoutes = require('./routes/adminDeposits');
-const adminReferralRoutes = require('./routes/adminReferrals');
-const adminWalletRoutes = require('./routes/adminWallets');
-const testCryptoRoutes = require('./routes/testCrypto');
+const authRoutes = require('./api/auth');
+const userAuthRoutes = require('./api/userAuth');
+const adminAuthRoutes = require('./api/adminAuth');
+const userRoutes = require('./api/user');
+const portfolioRoutes = require('./api/portfolio');
+const transactionRoutes = require('./api/transaction');
+const affiliateRoutes = require('./api/affiliate');
+const adminRoutes = require('./api/admin');
+const adminReferralRoutes = require('./api/adminReferrals');
+const adminWalletRoutes = require('./api/adminWallets');
+const adminPaymentsRoutes = require('./api/adminPayments');
+const paymentsRoutes = require('./api/payments');
 
 // Database connection
 const connectDatabase = async () => {
@@ -186,6 +185,8 @@ const startServer = async () => {
       limit: '10mb' 
     }));
 
+
+
     // Serve static files (uploaded files)
     app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -220,12 +221,14 @@ const startServer = async () => {
     app.use('/api/portfolios', portfolioRoutes);
     app.use('/api/transactions', transactionRoutes);
     app.use('/api/affiliate', affiliateRoutes);
-    app.use('/api/admin', adminRoutes);
-    app.use('/api/admin/deposits', adminDepositRoutes);
-    app.use('/api/admin/referrals', adminReferralRoutes);
-    app.use('/api/admin/wallets', adminWalletRoutes);
-    app.use('/api/deposit', depositRoutes);
-    app.use('/api/test', testCryptoRoutes);
+  // Mount admin wallets before the general /api/admin router so
+  // the public wallets endpoint (GET /api/admin/wallets/public)
+  // is not intercepted by the admin router's global `protect` middleware.
+  app.use('/api/admin/wallets', adminWalletRoutes);
+  app.use('/api/admin/payments', adminPaymentsRoutes);
+  app.use('/api/admin/referrals', adminReferralRoutes);
+  app.use('/api/admin', adminRoutes);
+    app.use('/api/payments', paymentsRoutes);
 
     // API documentation endpoint (basic)
     app.get('/api', (req, res) => {

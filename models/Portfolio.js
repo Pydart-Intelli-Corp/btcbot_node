@@ -403,7 +403,7 @@ Portfolio.getActivePortfolios = function() {
       isActive: true, 
       isVisible: true 
     },
-    order: [['displayOrder', 'ASC'], ['createdAt', 'DESC']]
+    order: [['displayOrder', 'ASC'], ['created_at', 'DESC']]
   });
 };
 

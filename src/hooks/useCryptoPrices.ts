@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { cryptoService } from '@/lib/enhancedCryptoService';
+import { cryptoService } from '@/services/enhancedCryptoService';
 
 interface CoinData {
   usd: number;

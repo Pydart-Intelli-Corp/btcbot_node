@@ -77,17 +77,21 @@ btcbot24/
 │   ├── hooks/          # Custom React hooks
 │   ├── lib/            # Utility libraries and services
 │   └── utils/          # Utility functions
-├── routes/             # Express.js API routes
+├── api/                # Express.js API routes (organized)
 ├── models/             # Sequelize database models
 ├── migrations/         # Database migration files
 ├── middleware/         # Express middleware
+├── scripts/            # Database setup & deployment scripts
+├── docs/               # Documentation files
 ├── utils/              # Backend utility functions
 ├── config/             # Configuration files
 ├── uploads/            # File upload directory
-├── logs/              # Application logs
-├── public/            # Static assets
-└── server.js          # Main application server
+├── logs/               # Application logs
+├── public/             # Static assets
+└── server.js           # Main application server
 ```
+
+📖 **For detailed directory structure, see [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)**
 
 ## Setup Instructions
 

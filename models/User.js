@@ -158,6 +158,7 @@ const User = sequelize.define('User', {
   totalDeposited: {
     type: DataTypes.DECIMAL(15, 2),
     defaultValue: 0.00,
+    field: 'total_deposited',
     validate: {
       min: 0
     }
@@ -442,18 +443,9 @@ User.prototype.resetLoginAttempts = async function() {
 };
 
 User.prototype.updateRank = function() {
-  const deposits = parseFloat(this.totalDeposited);
+  // Rank system simplified - no longer based on deposits
+  // Keep Bronze as default rank for all users
   let newRank = 'Bronze';
-  
-  if (deposits >= parseFloat(process.env.DIAMOND_MIN_DEPOSIT) || 100000) {
-    newRank = 'Diamond';
-  } else if (deposits >= parseFloat(process.env.PLATINUM_MIN_DEPOSIT) || 25000) {
-    newRank = 'Platinum';
-  } else if (deposits >= parseFloat(process.env.GOLD_MIN_DEPOSIT) || 5000) {
-    newRank = 'Gold';
-  } else if (deposits >= parseFloat(process.env.SILVER_MIN_DEPOSIT) || 1000) {
-    newRank = 'Silver';
-  }
   
   if (newRank !== this.currentRank) {
     this.currentRank = newRank;
