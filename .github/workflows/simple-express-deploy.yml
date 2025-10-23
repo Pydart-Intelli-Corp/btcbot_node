@@ -56,7 +56,7 @@ jobs:
           echo "⚙️ Creating environment configuration..."
           cat > .env << EOF
           NODE_ENV=${{ secrets.NODE_ENV }}
-          PORT=5000
+          PORT=80
           
           # Database Configuration
           DB_HOST=localhost
@@ -73,9 +73,9 @@ jobs:
           ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
           
           # Application Settings
-          BASE_URL=http://${{ secrets.VPS_HOST }}:5000
-          FRONTEND_URL=http://${{ secrets.VPS_HOST }}:5000
-          ALLOWED_ORIGINS=http://${{ secrets.VPS_HOST }}:5000,http://${{ secrets.VPS_HOST }},http://localhost:3000,http://localhost:5000
+          BASE_URL=http://${{ secrets.VPS_HOST }}
+          FRONTEND_URL=http://${{ secrets.VPS_HOST }}
+          ALLOWED_ORIGINS=http://${{ secrets.VPS_HOST }},http://${{ secrets.VPS_HOST }},http://localhost:3000,http://localhost
           
           # Email Configuration (optional)
           EMAIL_SERVICE=gmail
@@ -130,14 +130,14 @@ jobs:
           # Check application health
           echo "🏥 Checking application health..."
           sleep 10
-          curl -f http://localhost:5000/health || echo "Health check pending..."
+          curl -f http://localhost/health || echo "Health check pending..."
           
           # Verify deployment with comprehensive health checks
           echo "🧪 Verifying deployment..."
           sleep 15
           
           # Test health endpoint
-          if curl -f http://localhost:5000/health; then
+          if curl -f http://localhost/health; then
             echo "✅ Health check passed"
           else
             echo "❌ Health check failed"
@@ -145,7 +145,7 @@ jobs:
           fi
           
           # Test API endpoint
-          if curl -f http://localhost:5000/api; then
+          if curl -f http://localhost/api; then
             echo "✅ API endpoint accessible"
           else
             echo "⚠️ API endpoint check failed"
@@ -153,10 +153,10 @@ jobs:
           
           # Show application info
           echo "✅ Deployment completed!"
-          echo "📍 Application URL: http://${{ secrets.VPS_HOST }}:5000"
-          echo "🔧 Admin Panel: http://${{ secrets.VPS_HOST }}:5000/adminpanel"
-          echo "📊 Health Check: http://${{ secrets.VPS_HOST }}:5000/health"
-          echo "🔍 API Docs: http://${{ secrets.VPS_HOST }}:5000/api"
+          echo "📍 Application URL: http://${{ secrets.VPS_HOST }}"
+          echo "🔧 Admin Panel: http://${{ secrets.VPS_HOST }}/adminpanel"
+          echo "📊 Health Check: http://${{ secrets.VPS_HOST }}/health"
+          echo "🔍 API Docs: http://${{ secrets.VPS_HOST }}/api"
           
           # Show PM2 status and logs
           echo "📊 Final PM2 Status:"
@@ -169,9 +169,9 @@ jobs:
       run: |
         if [ ${{ job.status }} == 'success' ]; then
           echo "✅ Deployment successful!"
-          echo "🌐 Application: http://${{ secrets.VPS_HOST }}:5000"
-          echo "🔧 Admin Panel: http://${{ secrets.VPS_HOST }}:5000/adminpanel"
-          echo "📊 Health Check: http://${{ secrets.VPS_HOST }}:5000/health"
+          echo "🌐 Application: http://${{ secrets.VPS_HOST }}"
+          echo "🔧 Admin Panel: http://${{ secrets.VPS_HOST }}/adminpanel"
+          echo "📊 Health Check: http://${{ secrets.VPS_HOST }}/health"
         else
           echo "❌ Deployment failed!"
           echo "Check the deployment logs above for details."

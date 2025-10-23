@@ -3,6 +3,8 @@ const User = require('../models/User');
 const Portfolio = require('../models/Portfolio');
 const Transaction = require('../models/Transaction');
 const Affiliate = require('../models/Affiliate');
+const Payment = require('../models/Payment');
+const AdminWallet = require('../models/AdminWallet');
 
 async function runMigrations() {
   try {
@@ -20,6 +22,22 @@ async function runMigrations() {
     
     console.log('✓ Database tables created successfully.');
     
+    // Create default admin user if none exists
+    const userCount = await User.count();
+    if (userCount === 0) {
+      console.log('Creating default admin user...');
+      await createDefaultAdminUser();
+      console.log('✓ Default admin user created.');
+    }
+    
+    // Create sample admin wallets if none exist
+    const adminWalletCount = await AdminWallet.count();
+    if (adminWalletCount === 0) {
+      console.log('Creating sample admin wallets...');
+      await createSampleAdminWallets();
+      console.log('✓ Sample admin wallets created.');
+    }
+    
     // Create some sample portfolios if none exist
     const portfolioCount = await Portfolio.count();
     if (portfolioCount === 0) {
@@ -36,17 +54,81 @@ async function runMigrations() {
   }
 }
 
-async function createSamplePortfolios() {
-  const sampleUser = await User.create({
-    email: 'admin@btcbot24.com',
-    password: 'admin123',
+async function createDefaultAdminUser() {
+  const bcrypt = require('bcrypt');
+  const hashedPassword = await bcrypt.hash('Asd@123456', 10);
+  
+  const adminUser = await User.create({
+    email: 'btcclub48@gmail.com',
+    password: hashedPassword,
     firstName: 'Admin',
     lastName: 'User',
     role: 'admin',
     referralCode: 'BTCADMIN001',
     isEmailVerified: true,
-    isProfileComplete: true
+    isProfileComplete: true,
+    country: 'Global',
+    phone: '+1234567890'
   });
+  
+  return adminUser;
+}
+
+async function createSampleAdminWallets() {
+  const sampleWallets = [
+    {
+      walletType: 'USDT',
+      walletAddress: 'TQrZ8tKfjqUrjzSKzS5J4VY2Lk2j5J4VY2',
+      description: 'USDT Tether wallet for receiving payments',
+      networkType: 'TRC20',
+      isActive: true,
+      createdBy: 1
+    },
+    {
+      walletType: 'BTC',
+      walletAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+      description: 'Bitcoin wallet for receiving BTC payments',
+      networkType: 'Bitcoin',
+      isActive: true,
+      createdBy: 1
+    },
+    {
+      walletType: 'ETH',
+      walletAddress: '0x742d35Cc6635C0532925a3b8D4C65b9C9d9b8A9B',
+      description: 'Ethereum wallet for receiving ETH payments',
+      networkType: 'ERC20',
+      isActive: true,
+      createdBy: 1
+    },
+    {
+      walletType: 'BNB',
+      walletAddress: 'bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2',
+      description: 'Binance Coin wallet for receiving BNB payments',
+      networkType: 'BEP20',
+      isActive: true,
+      createdBy: 1
+    },
+    {
+      walletType: 'USDT',
+      walletAddress: '0x742d35Cc6635C0532925a3b8D4C65b9C9d9b8A9B',
+      description: 'USDT wallet on BEP20 network',
+      networkType: 'BEP20',
+      isActive: true,
+      createdBy: 1
+    }
+  ];
+
+  for (const walletData of sampleWallets) {
+    await AdminWallet.create(walletData);
+  }
+}
+
+async function createSamplePortfolios() {
+  // Get the admin user (should exist from createDefaultAdminUser)
+  const adminUser = await User.findOne({ where: { role: 'admin' } });
+  if (!adminUser) {
+    throw new Error('Admin user not found. Cannot create sample portfolios.');
+  }
 
   const portfolios = [
     {
@@ -67,7 +149,7 @@ async function createSamplePortfolios() {
         { name: '24/7 Trading', description: 'Round the clock automated trading', included: true },
         { name: 'Basic Support', description: 'Email support during business hours', included: true }
       ],
-      createdBy: sampleUser.id
+      createdBy: adminUser.id
     },
     {
       name: 'Premium Trader Bot',
@@ -88,7 +170,7 @@ async function createSamplePortfolios() {
         { name: 'Priority Support', description: '24/7 priority customer support', included: true },
         { name: 'Risk Management', description: 'Advanced risk management tools', included: true }
       ],
-      createdBy: sampleUser.id
+      createdBy: adminUser.id
     },
     {
       name: 'Elite Trader Bot',
@@ -113,7 +195,7 @@ async function createSamplePortfolios() {
         { name: 'Custom Strategy Building', description: 'Build and customize your own trading strategies', included: true },
         { name: 'Advanced Analytics', description: 'Comprehensive performance analytics and reporting', included: true }
       ],
-      createdBy: sampleUser.id
+      createdBy: adminUser.id
     },
     {
       name: 'Starter AI-Arbitrage',
@@ -136,7 +218,7 @@ async function createSamplePortfolios() {
       ],
       totalSubscribers: 1247,
       activeSubscribers: 892,
-      createdBy: sampleUser.id
+      createdBy: adminUser.id
     },
     {
       name: 'Pro AI-Arbitrage',
@@ -160,7 +242,7 @@ async function createSamplePortfolios() {
       ],
       totalSubscribers: 658,
       activeSubscribers: 456,
-      createdBy: sampleUser.id
+      createdBy: adminUser.id
     },
     {
       name: 'Quantum AI-Arbitrage',
@@ -188,7 +270,7 @@ async function createSamplePortfolios() {
       ],
       totalSubscribers: 127,
       activeSubscribers: 94,
-      createdBy: sampleUser.id
+      createdBy: adminUser.id
     }
   ];
 
