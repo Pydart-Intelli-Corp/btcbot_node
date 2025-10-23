@@ -50,9 +50,15 @@ BASE_URL=http://72.61.144.187:5000
 ALLOWED_ORIGINS=http://72.61.144.187:5000,http://localhost:3000
 EOF
 
-# Install dependencies
+# Clear caches and install dependencies
 echo "📦 Installing dependencies..."
+npm cache clean --force
+rm -rf node_modules package-lock.json .next
 npm install --production
+
+# Build Next.js application
+echo "🔨 Building application..."
+npm run build
 
 # Run database migrations
 echo "🗄️ Running database migrations..."

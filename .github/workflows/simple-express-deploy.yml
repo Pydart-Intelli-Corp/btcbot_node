@@ -42,11 +42,15 @@ jobs:
           echo "💾 Creating backup..."
           cp -r /var/www/btcbot24 /var/www/btcbot24-backup-$(date +%Y%m%d-%H%M%S) 2>/dev/null || echo "Backup skipped"
           
-          # Pull latest code
+          # Pull latest code with force update
           echo "📥 Pulling latest code..."
-          git fetch origin || echo "Fetch completed"
-          git reset --hard origin/main || echo "Reset completed"
-          git clean -fd || echo "Clean completed"
+          git fetch origin
+          git reset --hard origin/main
+          git clean -fd
+          
+          # Verify we have the latest commit
+          echo "📋 Current commit: $(git rev-parse --short HEAD)"
+          echo "📋 Latest commit: $(git ls-remote origin main | cut -f1 | cut -c1-7)"
           
           # Create .env file with all secrets
           echo "⚙️ Creating environment configuration..."
@@ -69,9 +73,9 @@ jobs:
           ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
           
           # Application Settings
-          BASE_URL=http://${{ secrets.VPS_HOST }}
-          FRONTEND_URL=http://${{ secrets.VPS_HOST }}
-          ALLOWED_ORIGINS=http://${{ secrets.VPS_HOST }},http://localhost:3000,http://localhost:5000
+          BASE_URL=http://${{ secrets.VPS_HOST }}:5000
+          FRONTEND_URL=http://${{ secrets.VPS_HOST }}:5000
+          ALLOWED_ORIGINS=http://${{ secrets.VPS_HOST }}:5000,http://${{ secrets.VPS_HOST }},http://localhost:3000,http://localhost:5000
           
           # Email Configuration (optional)
           EMAIL_SERVICE=gmail
@@ -85,17 +89,35 @@ jobs:
           BACKUP_RETENTION_DAYS=${{ secrets.BACKUP_RETENTION_DAYS }}
           EOF
           
-          # Install dependencies
+          # Clear caches and install dependencies
           echo "📦 Installing dependencies..."
+          npm cache clean --force
+          rm -rf node_modules package-lock.json .next
           npm install --production
+          
+          # Build Next.js application
+          echo "🔨 Building Next.js application..."
+          npm run build
+          
+          # Verify build output
+          if [ -d ".next" ]; then
+            echo "✅ Next.js build successful"
+          else
+            echo "❌ Next.js build failed"
+            exit 1
+          fi
           
           # Run database migrations
           echo "🗄️ Running database migrations..."
           node migrate.js || echo "Migration completed"
           
-          # Start application with PM2
+          # Start application with PM2 using ecosystem config
           echo "▶️ Starting application with PM2..."
-          pm2 start server.js --name "btcbot24" --instances 1
+          if [ -f ecosystem.config.js ]; then
+            pm2 start ecosystem.config.js --env production
+          else
+            pm2 start server.js --name "btcbot24" --instances 1
+          fi
           
           # Save PM2 configuration
           pm2 save
@@ -110,19 +132,47 @@ jobs:
           sleep 10
           curl -f http://localhost:5000/health || echo "Health check pending..."
           
+          # Verify deployment with comprehensive health checks
+          echo "🧪 Verifying deployment..."
+          sleep 15
+          
+          # Test health endpoint
+          if curl -f http://localhost:5000/health; then
+            echo "✅ Health check passed"
+          else
+            echo "❌ Health check failed"
+            pm2 logs btcbot24 --lines 10
+          fi
+          
+          # Test API endpoint
+          if curl -f http://localhost:5000/api; then
+            echo "✅ API endpoint accessible"
+          else
+            echo "⚠️ API endpoint check failed"
+          fi
+          
           # Show application info
           echo "✅ Deployment completed!"
-          echo "📍 Application URL: http://${{ secrets.VPS_HOST }}"
-          echo "🔧 Admin Panel: http://${{ secrets.VPS_HOST }}/adminpanel"
-          echo "📊 Health Check: http://${{ secrets.VPS_HOST }}/health"
+          echo "📍 Application URL: http://${{ secrets.VPS_HOST }}:5000"
+          echo "🔧 Admin Panel: http://${{ secrets.VPS_HOST }}:5000/adminpanel"
+          echo "📊 Health Check: http://${{ secrets.VPS_HOST }}:5000/health"
+          echo "🔍 API Docs: http://${{ secrets.VPS_HOST }}:5000/api"
+          
+          # Show PM2 status and logs
+          echo "📊 Final PM2 Status:"
+          pm2 status
+          echo "📝 Recent Logs:"
+          pm2 logs btcbot24 --lines 5 || echo "No logs available"
 
     - name: Notify deployment status
       if: always()
       run: |
         if [ ${{ job.status }} == 'success' ]; then
           echo "✅ Deployment successful!"
-          echo "🌐 Application: http://${{ secrets.VPS_HOST }}"
-          echo "🔧 Admin Panel: http://${{ secrets.VPS_HOST }}/adminpanel"
+          echo "🌐 Application: http://${{ secrets.VPS_HOST }}:5000"
+          echo "🔧 Admin Panel: http://${{ secrets.VPS_HOST }}:5000/adminpanel"
+          echo "📊 Health Check: http://${{ secrets.VPS_HOST }}:5000/health"
         else
           echo "❌ Deployment failed!"
+          echo "Check the deployment logs above for details."
         fi
